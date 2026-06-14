@@ -1,0 +1,80 @@
+# ============================================================
+# .gitignore — Restaurant Management System
+# ============================================================
+
+# ── Maven build output ──────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ── Compiled Java class files ───────────────────────────────
+*.class
+
+# ── Packaged JARs / WARs (the fat-JAR is built by CI) ───────
+*.jar
+*.war
+*.ear
+*.nar
+
+# ── Secrets and environment files ───────────────────────────
+.env
+.env.*
+*.secret
+secrets.properties
+
+# ── Production profile (contains prod DB creds / SSL config) ─
+src/main/resources/application-prod.properties
+
+# ── IDE — IntelliJ IDEA ─────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+# Keep .idea/codeStyles/ if the team shares formatting config:
+# !.idea/codeStyles/
+
+# ── IDE — Eclipse / STS ─────────────────────────────────────
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# ── IDE — VS Code ────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json   # keep recommended-extensions list
+
+# ── IDE — NetBeans ───────────────────────────────────────────
+nbactions.xml
+nb-configuration.xml
+
+# ── OS generated files ───────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Spring Boot DevTools restart file ───────────────────────
+.reloadtrigger
+
+# ── H2 embedded database (if used for tests) ────────────────
+*.db
+*.mv.db
+*.trace.db
+
+# ── Node / front-end tooling (if added later) ───────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+dist/
+.parcel-cache/
