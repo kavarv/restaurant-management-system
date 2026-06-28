@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Restaurant — Fine Dining, Warm Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/landing.css}"/>
+</head>
+<body>
+
+  <!-- ═══ NAVIGATION ═══════════════════════════════════════════════════ -->
+  <nav id="mainNav" class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <span class="brand-icon">🍽</span>
+        <span class="brand-name">The Restaurant</span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#menu"    class="nav-link">Menu</a></li>
+        <li><a href="#reserve" class="nav-link">Reserve</a></li>
+        <li><a href="#about"   class="nav-link">About</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a th:href="@{/login}" class="staff-login-btn" title="Staff login">
+          <span class="lock-icon">🔒</span>
+          <span class="staff-label">Staff</span>
+        </a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ══════════════════════════════════════════════════════════ -->
+  <section id="hero" class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Welcome to</p>
+      <h1 class="hero-title">The Restaurant</h1>
+      <p class="hero-tagline">Fine dining crafted with passion, served with warmth</p>
+      <div class="hero-ctas">
+        <a href="#menu"    class="btn-hero-primary">Explore Menu</a>
+        <a href="#reserve" class="btn-hero-outline">Reserve a Table</a>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ═══ MENU SECTION ══════════════════════════════════════════════════ -->
+  <section id="menu" class="section section-menu">
+    <div class="section-inner">
+      <div class="section-header">
+        <p class="section-eyebrow">What we offer</p>
+        <h2 class="section-title">Our Menu</h2>
+        <p class="section-subtitle">Fresh ingredients, inspired recipes, unforgettable flavours</p>
+      </div>
+
+      <!-- Search -->
+      <div class="menu-search-wrap">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="menuSearch" class="menu-search"
+               placeholder="Search dishes…" autocomplete="off"/>
+      </div>
+
+      <!-- Category pills -->
+      <div class="pills-row" id="categoryPills">
+        <button class="pill active" data-cat="">All</button>
+      </div>
+
+      <!-- Dietary toggles -->
+      <div class="dietary-row">
+        <label class="diet-toggle"><input type="checkbox" id="fVeg"/>   <span>🌿 Vegetarian</span></label>
+        <label class="diet-toggle"><input type="checkbox" id="fVegan"/> <span>🌱 Vegan</span></label>
+        <label class="diet-toggle"><input type="checkbox" id="fGf"/>    <span>🌾 Gluten-Free</span></label>
+      </div>
+
+      <!-- Menu grid -->
+      <div class="menu-grid" id="menuGrid">
+        <div class="grid-loading">Loading menu…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ RESERVE SECTION ═══════════════════════════════════════════════ -->
+  <section id="reserve" class="section section-reserve">
+    <div class="section-inner">
+      <div class="section-header">
+        <p class="section-eyebrow">Join us</p>
+        <h2 class="section-title">Reserve a Table</h2>
+        <p class="section-subtitle">Book your experience — no account needed</p>
+      </div>
+
+      <div class="reserve-card">
+        <div id="reserveAlert" class="r-alert" style="display:none;"></div>
+
+        <form id="reserveForm" novalidate>
+          <!-- Row 1: Name + Phone -->
+          <div class="form-row">
+            <div class="form-grp">
+              <label class="f-label" for="rName">Full Name <span class="req">*</span></label>
+              <input type="text" id="rName" class="f-input" placeholder="Jane Smith" required/>
+            </div>
+            <div class="form-grp">
+              <label class="f-label" for="rPhone">Phone Number</label>
+              <input type="tel" id="rPhone" class="f-input" placeholder="+44 7700 900000"/>
+            </div>
+          </div>
+
+          <!-- Row 2: Email -->
+          <div class="form-grp">
+            <label class="f-label" for="rEmail">Email Address</label>
+            <input type="email" id="rEmail" class="f-input" placeholder="jane@example.com"/>
+          </div>
+
+          <!-- Row 3: Party size + Date + Time -->
+          <div class="form-row form-row-3">
+            <div class="form-grp">
+              <label class="f-label">Party Size</label>
+              <div class="stepper">
+                <button type="button" class="step-btn" id="stepDown">−</button>
+                <span class="step-val"  id="partyVal">2</span>
+                <button type="button" class="step-btn" id="stepUp">+</button>
+              </div>
+            </div>
+            <div class="form-grp">
+              <label class="f-label" for="rDate">Date <span class="req">*</span></label>
+              <input type="date" id="rDate" class="f-input" required/>
+            </div>
+            <div class="form-grp">
+              <label class="f-label" for="rTime">Time <span class="req">*</span></label>
+              <select id="rTime" class="f-input f-select"></select>
+            </div>
+          </div>
+
+          <!-- Special requests -->
+          <div class="form-grp">
+            <label class="f-label" for="rNotes">Special Requests</label>
+            <textarea id="rNotes" class="f-input f-textarea" rows="3"
+                      placeholder="Dietary requirements, celebrations, seating preferences…"></textarea>
+          </div>
+
+          <button type="submit" class="btn-reserve" id="reserveBtn">
+            Book My Table
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ABOUT SECTION ════════════════════════════════════════════════ -->
+  <section id="about" class="section section-about">
+    <div class="section-inner about-grid">
+      <div class="about-text">
+        <p class="section-eyebrow">Our story</p>
+        <h2 class="section-title">Crafted With Passion</h2>
+        <p class="about-body">
+          Since opening our doors, we have been committed to bringing you the finest
+          seasonal ingredients prepared by our talented kitchen team. Every dish tells
+          a story — from the local farms we partner with to the carefully curated wine
+          list that completes each meal.
+        </p>
+        <ul class="about-facts">
+          <li><span class="fact-icon">📍</span> 12 High Street, London</li>
+          <li><span class="fact-icon">📞</span> +44 20 7946 0958</li>
+          <li><span class="fact-icon">🕐</span> Mon–Sat: 12:00 – 22:00</li>
+          <li><span class="fact-icon">🕐</span> Sun: 12:00 – 20:00</li>
+        </ul>
+      </div>
+      <div class="about-visual">
+        <div class="about-card about-card-1">
+          <span class="about-card-num">10+</span>
+          <span class="about-card-lbl">Years of Fine Dining</span>
+        </div>
+        <div class="about-card about-card-2">
+          <span class="about-card-num">40+</span>
+          <span class="about-card-lbl">Dishes on the Menu</span>
+        </div>
+        <div class="about-card about-card-3">
+          <span class="about-card-num">★ 4.9</span>
+          <span class="about-card-lbl">Guest Rating</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ════════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="brand-icon">🍽</span>
+        <span class="brand-name">The Restaurant</span>
+      </div>
+      <p class="footer-tagline">Fine dining, warm welcome</p>
+      <p class="footer-copy">&copy; 2026 The Restaurant. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ═══ SUCCESS MODAL ════════════════════════════════════════════════ -->
+  <div id="successModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-icon">🎉</div>
+      <h3 class="modal-title">You're all booked!</h3>
+      <p id="modalSummary" class="modal-summary"></p>
+      <p class="modal-code">Confirmation: <strong id="modalCode"></strong></p>
+      <p class="modal-hint">Please save your confirmation code. You can quote it when you arrive or call us to make changes.</p>
+      <button class="btn-reserve" id="modalClose" style="margin-top:20px;">Done</button>
+    </div>
+  </div>
+
+  <script th:src="@{/js/landing.js}" defer></script>
+</body>
+</html>

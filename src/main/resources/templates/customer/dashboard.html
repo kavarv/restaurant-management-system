@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Dashboard — The Restaurant</title>
+  <meta name="_csrf"        th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/customer.css}"/>
+</head>
+<body class="customer-layout" data-page="dashboard">
+
+  <nav class="customer-nav">
+    <div class="nav-brand">
+      <span class="nav-logo">🍽</span>
+      <span class="nav-title">The Restaurant</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/customer/dashboard" class="active">Home</a></li>
+      <li><a href="/customer/menu">Menu</a></li>
+      <li><a href="/customer/reserve">Reserve</a></li>
+      <li><a href="/customer/reservations">My Bookings</a></li>
+    </ul>
+    <form method="post" th:action="@{/logout}" class="nav-logout">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <button type="submit" class="btn-logout">Logout</button>
+    </form>
+  </nav>
+
+  <main class="customer-main">
+    <section class="welcome-section">
+      <h1 class="welcome-title" id="welcomeMsg">
+        Welcome back, <span th:text="${username}">Guest</span> 👋
+      </h1>
+      <p class="welcome-subtitle">What would you like today?</p>
+    </section>
+
+    <section class="quick-actions">
+      <a href="/customer/menu" class="action-card">
+        <div class="action-icon">🍽️</div>
+        <div class="action-label">Browse Menu</div>
+        <div class="action-desc">Explore our full menu</div>
+      </a>
+      <a href="/customer/reserve" class="action-card">
+        <div class="action-icon">📅</div>
+        <div class="action-label">Make a Reservation</div>
+        <div class="action-desc">Book your table today</div>
+      </a>
+      <a href="/customer/reservations" class="action-card">
+        <div class="action-icon">📋</div>
+        <div class="action-label">My Bookings</div>
+        <div class="action-desc">View &amp; manage bookings</div>
+      </a>
+    </section>
+
+    <section class="specials-section">
+      <h2 class="section-title">Today's Specials</h2>
+      <div class="specials-grid" id="specialsGrid">
+        <div class="loading-spinner">Loading specials…</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="customer-footer">
+    <p><strong>The Restaurant</strong> — Fine dining, warm welcome</p>
+  </footer>
+
+  <script th:src="@{/js/customer.js}" defer></script>
+</body>
+</html>

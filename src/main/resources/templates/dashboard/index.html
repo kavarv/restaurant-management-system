@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'dashboard', 'Dashboard')}">
+<main>
+
+  <!-- Admin / Manager Dashboard -->
+  <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle" th:text="'Today — ' + ${#temporals.format(#temporals.createNow(), 'EEEE, dd MMM yyyy')}"></p>
+      </div>
+      <a th:href="@{/orders/new}" class="btn btn-primary">New Order</a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-4" style="margin-bottom:var(--space-6);">
+      <div class="stat-card accent-gold">
+        <div class="stat-label">Today's Revenue</div>
+        <div class="stat-value" th:text="'RM ' + ${#numbers.formatDecimal(todayRevenue ?: 0, 1, 2)}">RM 0.00</div>
+        <div class="stat-sub">From completed orders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Orders</div>
+        <div class="stat-value" th:text="${activeOrderCount ?: 0}">0</div>
+        <div class="stat-sub">Pending + Confirmed + Preparing</div>
+      </div>
+      <div class="stat-card accent-green">
+        <div class="stat-label">Tables Occupied</div>
+        <div class="stat-value" th:text="${occupiedTables ?: 0} + ' / ' + ${totalTables ?: 0}">0/0</div>
+        <div class="stat-sub">Currently in use</div>
+      </div>
+      <div class="stat-card accent-red">
+        <div class="stat-label">Low Stock Items</div>
+        <div class="stat-value" th:text="${lowStockCount ?: 0}">0</div>
+        <div class="stat-sub"><a th:href="@{/inventory}">View inventory</a></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-2" style="margin-bottom:var(--space-6);">
+      <div class="card">
+        <div class="card-header"><h3>Revenue - Last 7 Days</h3></div>
+        <div class="card-body">
+          <div class="chart-container" style="height:240px;"><canvas id="revenueChart"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Orders by Status</h3></div>
+        <div class="card-body" style="display:flex;align-items:center;justify-content:center;">
+          <div class="chart-container" style="height:240px;max-width:320px;"><canvas id="statusChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff performance (Manager) -->
+    <sec:authorize access="hasRole('MANAGER') and !hasRole('ADMIN')">
+      <div class="card" style="margin-bottom:var(--space-6);">
+        <div class="card-header"><h3>Staff Performance Today</h3></div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Waiter</th><th>Orders Handled</th><th>Total Revenue</th></tr></thead>
+            <tbody>
+              <tr th:each="s : ${staffPerformance}" th:if="${staffPerformance != null}">
+                <td th:text="${s.waiterName}">-</td>
+                <td th:text="${s.orderCount}">0</td>
+                <td th:text="'RM ' + ${#numbers.formatDecimal(s.revenue, 1, 2)}">RM 0.00</td>
+              </tr>
+              <tr th:if="${staffPerformance == null or #lists.isEmpty(staffPerformance)}">
+                <td colspan="3" style="text-align:center;color:var(--color-text-muted);padding:32px;">No data for today.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sec:authorize>
+
+    <!-- Recent Orders -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Recent Orders</h3>
+        <a th:href="@{/orders}" class="btn btn-ghost btn-sm">View all</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr><th>#</th><th>Table</th><th>Waiter</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="o : ${recentOrders}" th:if="${recentOrders != null}">
+              <td th:text="${o.orderNumber}">-</td>
+              <td th:text="${o.tableNumber != null ? 'T-' + o.tableNumber : 'Takeaway'}">-</td>
+              <td th:text="${o.waiterName}">-</td>
+              <td th:text="${o.itemCount}">0</td>
+              <td th:text="'RM ' + ${#numbers.formatDecimal(o.totalAmount, 1, 2)}">RM 0.00</td>
+              <td><span class="badge" th:classappend="'badge-' + ${o.status}" th:text="${o.status}">-</span></td>
+              <td th:text="${#temporals.format(o.createdAt,'dd MMM HH:mm')}">-</td>
+              <td><a th:href="@{/orders/{id}(id=${o.id})}" class="btn btn-outline btn-sm">View</a></td>
+            </tr>
+            <tr th:if="${recentOrders == null or #lists.isEmpty(recentOrders)}">
+              <td colspan="8" style="text-align:center;color:var(--color-text-muted);padding:32px;">No orders yet today.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick links (Admin only) -->
+    <sec:authorize access="hasRole('ADMIN')">
+      <div style="margin-top:var(--space-6);">
+        <h3 style="margin-bottom:var(--space-4);">Quick Actions</h3>
+        <div class="grid grid-4">
+          <a th:href="@{/admin/users}" class="card" style="padding:var(--space-5);text-align:center;text-decoration:none;color:var(--color-text);">
+            <div style="font-size:2rem;margin-bottom:8px;">&#128101;</div><div style="font-weight:600;">Manage Users</div>
+          </a>
+          <a th:href="@{/menu}" class="card" style="padding:var(--space-5);text-align:center;text-decoration:none;color:var(--color-text);">
+            <div style="font-size:2rem;margin-bottom:8px;">&#127829;</div><div style="font-weight:600;">Edit Menu</div>
+          </a>
+          <a th:href="@{/reports}" class="card" style="padding:var(--space-5);text-align:center;text-decoration:none;color:var(--color-text);">
+            <div style="font-size:2rem;margin-bottom:8px;">&#128200;</div><div style="font-weight:600;">Reports</div>
+          </a>
+          <a th:href="@{/admin/audit}" class="card" style="padding:var(--space-5);text-align:center;text-decoration:none;color:var(--color-text);">
+            <div style="font-size:2rem;margin-bottom:8px;">&#128269;</div><div style="font-weight:600;">Audit Log</div>
+          </a>
+        </div>
+      </div>
+    </sec:authorize>
+
+  </sec:authorize>
+
+  <!-- Waiter Dashboard -->
+  <sec:authorize access="hasRole('WAITER') and !hasRole('ADMIN') and !hasRole('MANAGER')">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Dashboard</h1>
+        <p class="page-subtitle" sec:authentication="name"></p>
+      </div>
+      <a th:href="@{/orders/new}" class="btn btn-primary btn-lg">New Order</a>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:var(--space-6);">
+      <div class="stat-card accent-green">
+        <div class="stat-label">Available Tables</div>
+        <div class="stat-value" th:text="${availableTables ?: 0}">0</div>
+        <div class="stat-sub"><a th:href="@{/tables}">View floor</a></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">My Active Orders</div>
+        <div class="stat-value" th:text="${myActiveOrders ?: 0}">0</div>
+        <div class="stat-sub">Open right now</div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:var(--space-4);">My Active Orders</h3>
+    <div class="grid-auto grid" id="myOrdersGrid">
+      <div th:each="o : ${myOrders}" th:if="${myOrders != null}" class="card" style="padding:var(--space-4);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong th:text="${o.orderNumber}">-</strong>
+          <span class="badge" th:classappend="'badge-' + ${o.status}" th:text="${o.status}" th:attr="data-order-id=${o.id}">-</span>
+        </div>
+        <div class="text-sm text-muted" th:text="${o.tableNumber != null ? 'Table ' + o.tableNumber : 'Takeaway'}"></div>
+        <div class="text-sm" style="margin-top:4px;" th:text="${o.itemCount} + ' item(s) - RM ' + ${#numbers.formatDecimal(o.totalAmount, 1, 2)}"></div>
+        <div style="margin-top:var(--space-3);"><a th:href="@{/orders/{id}(id=${o.id})}" class="btn btn-ghost btn-sm">View</a></div>
+      </div>
+      <div th:if="${myOrders == null or #lists.isEmpty(myOrders)}" class="empty-state">
+        <div class="empty-state-icon">&#10003;</div>
+        <h3>All clear!</h3>
+        <p>No active orders right now.</p>
+      </div>
+    </div>
+
+  </sec:authorize>
+
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+(function () {
+  'use strict';
+  var labels   = /*[[${chartLabels}]]*/ ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var revenues = /*[[${chartRevenues}]]*/ [0,0,0,0,0,0,0];
+  var statusLabels = /*[[${statusLabels}]]*/ ['PENDING','CONFIRMED','PREPARING','READY','SERVED','COMPLETED'];
+  var statusCounts = /*[[${statusCounts}]]*/ [0,0,0,0,0,0];
+  var statusColors = {PENDING:'#FFB74D',CONFIRMED:'#64B5F6',PREPARING:'#B39DDB',READY:'#81C784',SERVED:'#CE93D8',COMPLETED:'#66BB6A',CANCELLED:'#EF9A9A'};
+
+  if (document.getElementById('revenueChart')) {
+    new Chart(document.getElementById('revenueChart'), {
+      type: 'line',
+      data: { labels: labels, datasets: [{ label:'Revenue (RM)', data: revenues,
+        borderColor:'#6B1D2A', backgroundColor:'rgba(107,29,42,.1)',
+        tension:.35, fill:true, pointBackgroundColor:'#6B1D2A' }] },
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{ y:{ beginAtZero:true, ticks:{ callback: function(v){ return 'RM '+v; } } } } }
+    });
+  }
+  if (document.getElementById('statusChart')) {
+    new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: { labels: statusLabels, datasets: [{ data: statusCounts,
+        backgroundColor: statusLabels.map(function(l){ return statusColors[l]||'#ccc'; }),
+        borderWidth:2, borderColor:'#fff' }] },
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'right' } }, cutout:'60%' }
+    });
+  }
+})();
+</script>
+</body>
+</html>

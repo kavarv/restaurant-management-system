@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Access Denied — Restaurant Management System</title>
+    <link rel="stylesheet" th:href="@{/css/error.css}"/>
+</head>
+<body>
+
+<div class="error-wrapper">
+    <div class="error-card">
+
+        <div class="error-icon">🚫</div>
+
+        <h1 class="error-code">403</h1>
+        <h2 class="error-title">Access Denied</h2>
+
+        <p class="error-message">
+            You don't have permission to view this page.
+            <!--
+              sec:authentication="name" renders the currently logged-in username.
+              Requires thymeleaf-extras-springsecurity6 on the classpath (already in pom.xml).
+            -->
+            <span sec:authorize="isAuthenticated()">
+                You are signed in as <strong sec:authentication="name"></strong>.
+            </span>
+        </p>
+
+        <p class="error-hint">
+            If you believe this is a mistake, please contact your system administrator.
+        </p>
+
+        <div class="error-actions">
+            <!--
+              Go back to the role-appropriate home page.
+              sec:authorize checks the current user's granted authorities.
+            -->
+            <a sec:authorize="hasRole('ADMIN')"    th:href="@{/admin/dashboard}"   class="btn btn-primary">Admin Dashboard</a>
+            <a sec:authorize="hasRole('MANAGER')"  th:href="@{/manager/dashboard}" class="btn btn-primary">Manager Dashboard</a>
+            <a sec:authorize="hasRole('WAITER')"   th:href="@{/orders}"            class="btn btn-primary">My Orders</a>
+            <a sec:authorize="hasRole('CHEF')"     th:href="@{/kitchen}"           class="btn btn-primary">Kitchen Display</a>
+            <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/menu}"              class="btn btn-primary">Menu</a>
+
+            <!-- Fallback for any authenticated user not matched above -->
+            <a sec:authorize="isAuthenticated()"   th:href="@{/dashboard}"         class="btn btn-secondary">Dashboard</a>
+
+            <!-- Shown to unauthenticated visitors (shouldn't normally reach /403) -->
+            <a sec:authorize="!isAuthenticated()"  th:href="@{/login}"             class="btn btn-primary">Sign In</a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(pageTitle)">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#6B1D2A"/>
+
+  <!-- CSRF meta for JS fetch() calls -->
+  <meta name="_csrf"        th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+  <title th:text="${pageTitle} + ' — RMS'">Restaurant Management System</title>
+
+  <!-- Global design system -->
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+
+  <!-- Inline slot for page-specific styles -->
+  <th:block th:replace="${headExtra} ?: ~{}"></th:block>
+</head>
+
+<!--
+  Main application shell fragment.
+
+  Usage in a page template:
+  ─────────────────────────
+  <!DOCTYPE html>
+  <html xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="...">
+
+  <head th:replace="~{fragments/layout :: head('Page Title')}"></head>
+
+  <body th:replace="~{fragments/layout :: layout(~{::main}, 'active-menu-key', 'Page Title')}">
+    <main>
+      <!-- page body goes here -->
+    </main>
+  </body>
+  </html>
+-->
+<body>
+
+<div th:fragment="layout(content, activeMenu, pageTitle)" class="app-shell">
+
+  <!-- ── Top Bar ─────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <!-- Hamburger for mobile -->
+    <button class="btn btn-ghost btn-sm" id="sidebarToggle"
+            style="display:none;" aria-label="Open menu">☰</button>
+
+    <a th:href="@{/dashboard}" class="topbar-brand">
+      <img th:src="@{/images/logo.png}" alt="RMS"
+           onerror="this.style.display='none'"/>
+      <span>Restaurant MS</span>
+    </a>
+
+    <div class="topbar-right">
+
+      <!-- Notification Bell (WebSocket updates dot) -->
+      <button class="notification-bell" id="notificationBell" aria-label="Notifications">
+        🔔
+        <span class="notification-dot" id="notificationDot" style="display:none;"></span>
+      </button>
+
+      <!-- User info -->
+      <div class="dropdown">
+        <div class="user-avatar" id="userAvatarBtn"
+             sec:authentication="name" style="cursor:pointer;">
+          <span sec:authentication="name"
+                th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
+        </div>
+
+        <div class="dropdown-menu" id="userDropdown">
+          <div style="padding: 10px 16px; border-bottom: 1px solid var(--color-border);">
+            <div style="font-weight:600; font-size:var(--fs-sm);"
+                 sec:authentication="name"></div>
+            <div style="margin-top:4px;">
+              <sec:authorize access="hasRole('ADMIN')">
+                <span class="badge badge-ADMIN">Admin</span>
+              </sec:authorize>
+              <sec:authorize access="hasRole('MANAGER') and !hasRole('ADMIN')">
+                <span class="badge badge-MANAGER">Manager</span>
+              </sec:authorize>
+              <sec:authorize access="hasRole('WAITER') and !hasRole('ADMIN') and !hasRole('MANAGER')">
+                <span class="badge badge-WAITER">Waiter</span>
+              </sec:authorize>
+              <sec:authorize access="hasRole('CHEF')">
+                <span class="badge badge-CHEF">Chef</span>
+              </sec:authorize>
+            </div>
+          </div>
+          <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="dropdown-item danger">🚪 Sign Out</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+  <!-- ── Main Content ────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Flash messages -->
+    <div th:replace="~{fragments/messages :: messages}"></div>
+
+    <!-- Page content injected here -->
+    <th:block th:replace="${content}"></th:block>
+
+  </main>
+
+  <!-- ── Scripts (inside fragment so they load on every page) ──────── -->
+  <script th:src="@{/webjars/sockjs-client/sockjs.min.js}"></script>
+  <script th:src="@{/webjars/stomp-websocket/stomp.min.js}"></script>
+  <script th:src="@{/js/main.js}"></script>
+
+  <!-- Page-specific script slot -->
+  <th:block th:replace="${bodyExtra} ?: ~{}"></th:block>
+
+</div>
+
+</body>
+</html>

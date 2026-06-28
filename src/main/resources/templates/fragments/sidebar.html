@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!--
+  Sidebar navigation fragment.
+  Usage: <nav th:replace="~{fragments/sidebar :: sidebar(activeMenu='dashboard')}"></nav>
+
+  The activeMenu parameter lets each page declare which nav item is highlighted.
+  Counts (pendingOrders, lowStockCount) are added to the model by a controller/interceptor.
+-->
+<nav th:fragment="sidebar" class="sidebar" id="appSidebar">
+
+  <!-- ── Logo area ───────────────────────────────────────────────────── -->
+  <div style="padding: 20px 20px 8px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 8px;">
+    <a th:href="@{/dashboard}" class="topbar-brand" style="color:#fff; font-size:1rem;">
+      <span style="font-size:1.4rem;">🍽️</span>
+      <span>RMS</span>
+    </a>
+  </div>
+
+  <!-- ── ADMIN links ─────────────────────────────────────────────────── -->
+  <sec:authorize access="hasRole('ADMIN')">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Admin</div>
+      <ul class="sidebar-nav">
+        <li>
+          <a th:href="@{/dashboard}"
+             th:classappend="${activeMenu == 'dashboard'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📊</span> Dashboard
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/admin/users}"
+             th:classappend="${activeMenu == 'users'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">👥</span> Users
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/menu}"
+             th:classappend="${activeMenu == 'menu'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🍕</span> Menu
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/orders}"
+             th:classappend="${activeMenu == 'orders'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🧾</span> Orders
+            <span class="nav-badge" th:if="${pendingOrders != null and pendingOrders > 0}"
+                  th:text="${pendingOrders}"></span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/reservations}"
+             th:classappend="${activeMenu == 'reservations'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📅</span> Reservations
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/tables}"
+             th:classappend="${activeMenu == 'tables'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🪑</span> Floor View
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/inventory}"
+             th:classappend="${activeMenu == 'inventory'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📦</span> Inventory
+            <span class="nav-badge" th:if="${lowStockCount != null and lowStockCount > 0}"
+                  th:text="${lowStockCount}" style="background:#B71C1C;"></span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/reports}"
+             th:classappend="${activeMenu == 'reports'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📈</span> Reports
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/admin/audit}"
+             th:classappend="${activeMenu == 'audit'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🔍</span> Audit Log
+          </a>
+        </li>
+      </ul>
+    </div>
+  </sec:authorize>
+
+  <!-- ── MANAGER links ───────────────────────────────────────────────── -->
+  <sec:authorize access="hasRole('MANAGER') and !hasRole('ADMIN')">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Manager</div>
+      <ul class="sidebar-nav">
+        <li>
+          <a th:href="@{/dashboard}"
+             th:classappend="${activeMenu == 'dashboard'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📊</span> Dashboard
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/menu}"
+             th:classappend="${activeMenu == 'menu'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🍕</span> Menu
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/orders}"
+             th:classappend="${activeMenu == 'orders'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🧾</span> Orders
+            <span class="nav-badge" th:if="${pendingOrders != null and pendingOrders > 0}"
+                  th:text="${pendingOrders}"></span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/reservations}"
+             th:classappend="${activeMenu == 'reservations'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📅</span> Reservations
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/tables}"
+             th:classappend="${activeMenu == 'tables'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🪑</span> Floor View
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/inventory}"
+             th:classappend="${activeMenu == 'inventory'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📦</span> Inventory
+            <span class="nav-badge" th:if="${lowStockCount != null and lowStockCount > 0}"
+                  th:text="${lowStockCount}" style="background:#B71C1C;"></span>
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/reports}"
+             th:classappend="${activeMenu == 'reports'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📈</span> Reports
+          </a>
+        </li>
+      </ul>
+    </div>
+  </sec:authorize>
+
+  <!-- ── WAITER links ────────────────────────────────────────────────── -->
+  <sec:authorize access="hasRole('WAITER') and !hasRole('ADMIN') and !hasRole('MANAGER')">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Waiter</div>
+      <ul class="sidebar-nav">
+        <li>
+          <a th:href="@{/dashboard}"
+             th:classappend="${activeMenu == 'dashboard'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📊</span> Dashboard
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/orders/new}"
+             th:classappend="${activeMenu == 'new-order'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">➕</span> New Order
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/orders}"
+             th:classappend="${activeMenu == 'orders'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🧾</span> My Orders
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/reservations}"
+             th:classappend="${activeMenu == 'reservations'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">📅</span> Reservations
+          </a>
+        </li>
+        <li>
+          <a th:href="@{/tables}"
+             th:classappend="${activeMenu == 'tables'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">🪑</span> Floor View
+          </a>
+        </li>
+      </ul>
+    </div>
+  </sec:authorize>
+
+  <!-- ── CHEF links ──────────────────────────────────────────────────── -->
+  <sec:authorize access="hasRole('CHEF') and !hasRole('ADMIN') and !hasRole('MANAGER')">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Kitchen</div>
+      <ul class="sidebar-nav">
+        <li>
+          <a th:href="@{/kitchen}"
+             th:classappend="${activeMenu == 'kitchen'} ? 'active'"
+             class="nav-link">
+            <span class="nav-icon">👨‍🍳</span> Kitchen Display
+          </a>
+        </li>
+      </ul>
+    </div>
+  </sec:authorize>
+
+  <!-- ── Logout (bottom) ─────────────────────────────────────────────── -->
+  <div class="sidebar-footer">
+    <form th:action="@{/logout}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <button type="submit" class="nav-link" style="width:100%; border:none; background:none; cursor:pointer; color:rgba(255,255,255,.7);">
+        <span class="nav-icon">🚪</span> Sign Out
+      </button>
+    </form>
+  </div>
+
+</nav>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+/* dashboard.css — shared styles for admin, manager, and general dashboards */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+/* ── Nav ───────────────────────────────────────────────────────────────── */
+.topnav {
+    display: flex; align-items: center; gap: 1rem;
+    background: #1a1a2e; color: #fff;
+    padding: 0 1.5rem; height: 56px;
+    position: sticky; top: 0; z-index: 100;
+}
+.brand  { font-size: 1.1rem; font-weight: 800; white-space: nowrap; margin-right: auto; }
+.nav-links { display: flex; gap: 0.25rem; }
+.nav-links a {
+    color: #cbd5e1; text-decoration: none; padding: 0.4rem 0.9rem;
+    border-radius: 6px; font-size: 0.9rem; transition: background 0.15s;
+}
+.nav-links a:hover, .nav-links a.active { background: #4f46e5; color: #fff; }
+.nav-user { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: #cbd5e1; white-space: nowrap; }
+.btn-logout {
+    background: transparent; border: 1px solid #475569; color: #cbd5e1;
+    padding: 0.3rem 0.8rem; border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+}
+.btn-logout:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+/* ── Layout ────────────────────────────────────────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { font-size: 1.75rem; font-weight: 700; }
+.page-header .subtitle { color: #6c757d; margin-top: 0.25rem; }
+.section { margin-bottom: 2.5rem; }
+.section h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+/* ── Stats grid ─────────────────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+.stat-card { background: #fff; border-radius: 10px; padding: 1.25rem 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.07); text-align: center; }
+.stat-card.highlight { border-top: 3px solid #4f46e5; }
+.stat-value { font-size: 2rem; font-weight: 800; color: #1a1a2e; }
+.stat-label { font-size: 0.8rem; color: #6c757d; margin-top: 0.25rem; font-weight: 500; }
+
+/* ── Action cards ────────────────────────────────────────────────────────── */
+.action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+.action-card {
+    background: #fff; border-radius: 10px; padding: 1.5rem 1rem;
+    text-align: center; text-decoration: none; color: #1a1a2e;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07); font-weight: 600; font-size: 0.95rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.action-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); color: #4f46e5; }
+
+/* ── Alerts ──────────────────────────────────────────────────────────────── */
+.alert { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.9rem; border-left: 4px solid; }
+.alert-success { background: #f0fff4; color: #27ae60; border-left-color: #27ae60; }
+.alert-error   { background: #fff5f5; color: #c0392b; border-left-color: #c0392b; }
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+.data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+.data-table th { background: #f8f9fa; padding: 0.75rem 1rem; text-align: left; font-size: 0.8rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; }
+.data-table td { padding: 0.75rem 1rem; border-top: 1px solid #f0f2f5; font-size: 0.9rem; }
+.data-table tr:hover td { background: #fafbfc; }
+.row-warning td { color: #d68910; }
+
+/* ── Misc ────────────────────────────────────────────────────────────────── */
+.badge { background: #ef4444; color: #fff; border-radius: 999px; font-size: 0.75rem; padding: 0.1rem 0.5rem; font-weight: 700; }
+.empty-state { color: #6c757d; font-size: 0.9rem; padding: 1rem 0; }
+.btn { display: inline-block; padding: 0.5rem 1.2rem; border-radius: 7px; font-size: 0.875rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; margin-top: 0.75rem; }
+.btn-secondary { background: #e5e7eb; color: #374151; }
+.btn-secondary:hover { background: #d1d5db; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-danger:hover { background: #dc2626; }

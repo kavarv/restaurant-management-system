@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Flash-message fragment.
+  Usage: <div th:replace="~{fragments/messages :: messages}"></div>
+
+  Spring controllers add messages via RedirectAttributes:
+    redirectAttrs.addFlashAttribute("successMessage", "Order created!");
+    redirectAttrs.addFlashAttribute("errorMessage", "Something went wrong.");
+    redirectAttrs.addFlashAttribute("warningMessage", "Low stock detected.");
+-->
+<div th:fragment="messages">
+
+  <div th:if="${successMessage}" class="alert alert-success" role="alert">
+    <span class="alert-icon">✅</span>
+    <span th:text="${successMessage}"></span>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+    <span class="alert-icon">❌</span>
+    <span th:text="${errorMessage}"></span>
+  </div>
+
+  <div th:if="${warningMessage}" class="alert alert-warning" role="alert">
+    <span class="alert-icon">⚠️</span>
+    <span th:text="${warningMessage}"></span>
+  </div>
+
+  <div th:if="${infoMessage}" class="alert alert-info" role="alert">
+    <span class="alert-icon">ℹ️</span>
+    <span th:text="${infoMessage}"></span>
+  </div>
+
+  <!-- Spring MVC binding errors passed directly to model -->
+  <div th:if="${globalError}" class="alert alert-danger" role="alert">
+    <span class="alert-icon">❌</span>
+    <span th:text="${globalError}"></span>
+  </div>
+
+</div>
+
+</body>
+</html>
