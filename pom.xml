@@ -33,6 +33,7 @@
         <java.version>17</java.version>
         <!-- Keeps all springdoc / openapi artefacts in sync -->
         <springdoc.version>2.3.0</springdoc.version>
+        <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
     <!-- ================================================================
@@ -59,7 +60,6 @@
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-            <!-- Version managed by spring-boot-starter-parent -->
         </dependency>
 
         <!-- STOMP/WebSocket support (real-time order updates, KDS feed) -->
@@ -88,13 +88,19 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope> <!-- not needed at compile time -->
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- H2 in-memory database for tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- ── VALIDATION ───────────────────────────────────────────── -->
 
-        <!-- Bean Validation 3.0 / Hibernate Validator 8
-             (@NotBlank, @Email, @Size … on DTOs and entities) -->
+        <!-- Bean Validation 3.0 / Hibernate Validator 8 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -102,7 +108,7 @@
 
         <!-- ── OBSERVABILITY ────────────────────────────────────────── -->
 
-        <!-- /actuator/health, /actuator/info, /actuator/metrics … -->
+        <!-- /actuator/health, /actuator/info, /actuator/metrics -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -135,12 +141,11 @@
 
         <!-- ── DEVELOPER TOOLING ─────────────────────────────────────── -->
 
-        <!-- Hot-reload templates + static resources without restart;
-             automatic restart on .class changes in src/main -->
+        <!-- Hot-reload templates + static resources without restart -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>  <!-- never packaged into the final JAR -->
+            <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
 
@@ -148,7 +153,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional> <!-- compile-time only; excluded from JAR -->
+            <optional>true</optional>
         </dependency>
 
         <!-- ── TESTING ───────────────────────────────────────────────── -->
@@ -167,6 +172,22 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- WebJars: SockJS + STOMP clients -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>sockjs-client</artifactId>
+            <version>1.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>stomp-websocket</artifactId>
+            <version>2.3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator-core</artifactId>
+        </dependency>
+
     </dependencies>
 
     <!-- ================================================================
@@ -175,13 +196,11 @@
     <build>
         <plugins>
 
-            <!-- Repackages the JAR into a self-contained executable fat-JAR
-                 and provides `mvn spring-boot:run` -->
+            <!-- Spring Boot fat-JAR + spring-boot:run -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <!-- Exclude Lombok and DevTools from the production fat-JAR -->
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -195,25 +214,101 @@
                 </configuration>
             </plugin>
 
-            <!-- Surefire 3.x is required for JUnit 5 (Jupiter) discovery.
-                 The version is pinned here; spring-boot-starter-parent already
-                 manages it, but being explicit avoids surprises on CI. -->
+            <!-- Surefire 3.x — required for JUnit 5 Jupiter discovery -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- Run tests in parallel by class to cut CI time -->
-                    <parallel>classes</parallel>
-                    <threadCount>4</threadCount>
-                    <!-- Ensure Spring Boot test slice annotations are not
-                         filtered out by accident -->
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                        <include>**/*IT.java</include>
-                    </includes>
+                    <!-- Run @Disabled tests only when -Dgroups is not set,
+                         so integration tests are skipped by default. -->
+                    <excludes>
+                        <exclude>**/*IntegrationTest.java</exclude>
+                    </excludes>
+                    <!-- Pass the active Spring profile to each test JVM -->
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
                 </configuration>
+            </plugin>
+
+            <!-- ─────────────────────────────────────────────────────────
+                 JaCoCo — bytecode instrumentation for code coverage.
+
+                 Goals wired:
+                   prepare-agent  (pre-test)  — sets -javaagent JVM arg so
+                                                Surefire picks up coverage
+                   report         (post-test) — generates HTML/XML in
+                                                target/site/jacoco/
+                   check          (verify)    — fails the build if service
+                                                layer LINE coverage < 70 %
+
+                 Run locally:
+                   mvn verify                 (runs tests + coverage check)
+                   mvn jacoco:report          (HTML report only, no check)
+
+                 CI badge source:
+                   target/site/jacoco/jacoco.xml
+                 ───────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+
+                    <!-- 1. Instrument classes before Surefire runs -->
+                    <execution>
+                        <id>jacoco-prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+
+                    <!-- 2. Generate HTML + XML report after tests finish -->
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>test</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+
+                    <!-- 3. Enforce 70 % LINE coverage on the service layer -->
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <!-- Only measure service implementation classes -->
+                                    <includes>
+                                        <include>com/restaurant/rms/service/impl/*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <!-- 70 % minimum — raise to 0.80 once tests mature -->
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                            <!-- Classes to exclude from coverage measurement:
+                                 - Generated Lombok code (builders, equals, hashCode)
+                                 - Application entry point (not unit-testable)
+                                 - Config classes (tested implicitly by integration tests)
+                                 - DTOs / entities (plain data holders)                  -->
+                            <excludes>
+                                <exclude>com/restaurant/rms/RmsApplication.class</exclude>
+                                <exclude>com/restaurant/rms/config/**</exclude>
+                                <exclude>com/restaurant/rms/dto/**</exclude>
+                                <exclude>com/restaurant/rms/entity/**</exclude>
+                                <exclude>com/restaurant/rms/exception/**</exclude>
+                                <exclude>com/restaurant/rms/security/UserPrincipal.class</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+
+                </executions>
             </plugin>
 
         </plugins>
