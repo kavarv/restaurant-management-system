@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="_csrf"        th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <title>Kitchen Display - RMS</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+
+<body class="kds-shell">
+
+<!-- KDS Topbar -->
+<header class="kds-topbar">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span style="font-size:1.5rem;">&#128104;&#8205;&#127859;</span>
+    <div>
+      <div style="font-weight:700;font-size:1.1rem;color:#E0E0E0;">Kitchen Display</div>
+      <div id="kdsTime" style="font-size:var(--fs-xs);color:#757575;font-family:var(--font-mono);"></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="wsStatus" style="font-size:var(--fs-xs);color:#9E9E9E;">Connecting...</span>
+    <span id="newOrderAlert" style="display:none;" class="badge badge-warning">NEW ORDER!</span>
+    <a th:href="@{/dashboard}" class="btn btn-outline btn-sm" style="color:#E0E0E0;border-color:#555;">
+      Back
+    </a>
+  </div>
+</header>
+
+<!-- Three-column board -->
+<div class="kds-board" id="kdsBoard">
+
+  <!-- NEW ORDERS column -->
+  <div class="kds-column">
+    <div class="kds-column-title">
+      &#127381; New Orders
+      <span id="newCount" class="badge badge-warning" style="margin-left:8px;">0</span>
+    </div>
+    <div id="colNew">
+      <div th:each="o : ${pendingOrders}" th:if="${pendingOrders != null}"
+           class="kds-card new-order"
+           th:attr="data-order-id=${o.id}, data-start-time=${o.createdAt}">
+        <div class="kds-card-header">
+          <span class="kds-order-num" th:text="'#' + ${o.orderNumber}">-</span>
+          <span class="kds-timer" data-start="0">00:00</span>
+        </div>
+        <div style="font-size:var(--fs-xs);color:#757575;margin-bottom:8px;"
+             th:text="${o.tableNumber != null ? 'Table ' + o.tableNumber : 'Takeaway'} + ' | ' + ${#temporals.format(o.createdAt,'HH:mm')}"></div>
+        <div class="kds-items">
+          <div th:each="item : ${o.items}" class="kds-item">
+            <span class="kds-item-qty" th:text="${item.quantity} + 'x'">1x</span>
+            <span th:text="${item.menuItemName}">Item</span>
+          </div>
+          <div th:each="item : ${o.items}" th:if="${item.specialInstructions != null and !#strings.isEmpty(item.specialInstructions)}"
+               class="kds-item-note" th:text="'Note: ' + ${item.specialInstructions}"></div>
+        </div>
+        <button class="btn btn-warning btn-sm" style="margin-top:12px;width:100%;"
+                th:attr="data-order-id=${o.id}"
+                onclick="kdsAction(this, 'PREPARING')">
+          Start Preparing
+        </button>
+      </div>
+      <div th:if="${pendingOrders == null or #lists.isEmpty(pendingOrders)}"
+           style="text-align:center;color:#555;padding:32px;font-size:var(--fs-sm);">
+        No new orders
+      </div>
+    </div>
+  </div>
+
+  <!-- PREPARING column -->
+  <div class="kds-column">
+    <div class="kds-column-title">
+      &#127859; Preparing
+      <span id="prepCount" class="badge badge-info" style="margin-left:8px;">0</span>
+    </div>
+    <div id="colPreparing">
+      <div th:each="o : ${preparingOrders}" th:if="${preparingOrders != null}"
+           class="kds-card"
+           th:attr="data-order-id=${o.id}, data-start-time=${o.updatedAt}">
+        <div class="kds-card-header">
+          <span class="kds-order-num" th:text="'#' + ${o.orderNumber}">-</span>
+          <span class="kds-timer" data-start="0">00:00</span>
+        </div>
+        <div style="font-size:var(--fs-xs);color:#757575;margin-bottom:8px;"
+             th:text="${o.tableNumber != null ? 'Table ' + o.tableNumber : 'Takeaway'}"></div>
+        <div class="kds-items">
+          <div th:each="item : ${o.items}" class="kds-item">
+            <span class="kds-item-qty" th:text="${item.quantity} + 'x'">1x</span>
+            <span th:text="${item.menuItemName}">Item</span>
+          </div>
+        </div>
+        <button class="btn btn-success btn-sm" style="margin-top:12px;width:100%;"
+                th:attr="data-order-id=${o.id}"
+                onclick="kdsAction(this, 'READY')">
+          Mark Ready
+        </button>
+      </div>
+      <div th:if="${preparingOrders == null or #lists.isEmpty(preparingOrders)}"
+           style="text-align:center;color:#555;padding:32px;font-size:var(--fs-sm);">
+        Nothing in progress
+      </div>
+    </div>
+  </div>
+
+  <!-- READY column -->
+  <div class="kds-column">
+    <div class="kds-column-title">
+      &#9989; Ready to Serve
+      <span id="readyCount" class="badge badge-success" style="margin-left:8px;">0</span>
+    </div>
+    <div id="colReady">
+      <div th:each="o : ${readyOrders}" th:if="${readyOrders != null}"
+           class="kds-card" style="border-color:#66BB6A;"
+           th:attr="data-order-id=${o.id}">
+        <div class="kds-card-header">
+          <span class="kds-order-num" th:text="'#' + ${o.orderNumber}">-</span>
+          <span class="badge badge-READY">READY</span>
+        </div>
+        <div style="font-size:var(--fs-xs);color:#757575;"
+             th:text="${o.tableNumber != null ? 'Table ' + o.tableNumber : 'Takeaway'}"></div>
+      </div>
+      <div th:if="${readyOrders == null or #lists.isEmpty(readyOrders)}"
+           style="text-align:center;color:#555;padding:32px;font-size:var(--fs-sm);">
+        Nothing ready yet
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script th:src="@{/js/vendor/sockjs.min.js}"></script>
+<script th:src="@{/js/vendor/stomp.min.js}"></script>
+<script th:src="@{/js/kitchen.js}"></script>
+</body>
+</html>
