@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Entity Change History</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <style>
+        h1 span { font-size:1rem; color:#6c757d; font-weight:400; }
+        .entry-card { border:1px solid #dee2e6; border-radius:6px; margin-bottom:1.25rem;
+                      overflow:hidden; }
+        .entry-header { background:#2c3e50; color:#fff; padding:.6rem 1rem;
+                        display:flex; gap:1.5rem; align-items:center; font-size:.875rem; }
+        .badge { padding:.2rem .5rem; border-radius:3px; font-size:.75rem; font-weight:600; }
+        .badge-CREATE  { background:#d4edda; color:#155724; }
+        .badge-UPDATE  { background:#fff3cd; color:#856404; }
+        .badge-DELETE  { background:#f8d7da; color:#721c24; }
+        .badge-RESTORE { background:#d1ecf1; color:#0c5460; }
+        .diff-table { width:100%; border-collapse:collapse; }
+        .diff-table th { background:#f1f3f5; padding:.45rem .9rem; text-align:left;
+                         font-size:.8rem; width:33%; border-bottom:1px solid #dee2e6; }
+        .diff-table td { padding:.45rem .9rem; font-size:.85rem;
+                         border-bottom:1px solid #f1f3f5; word-break:break-all; }
+        .old-val { color:#c0392b; background:#fdf3f2; }
+        .new-val { color:#27ae60; background:#f0faf3; }
+        .no-diff { color:#6c757d; font-style:italic; padding:.8rem 1rem; }
+        .btn { padding:.4rem .9rem; border:none; border-radius:4px; cursor:pointer;
+               font-size:.875rem; text-decoration:none; }
+        .btn-back { background:#95a5a6; color:#fff; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h1>
+            <span th:text="${entityType}">MenuItem</span> #<span th:text="${entityId}">42</span>
+            — Change History
+        </h1>
+        <a th:href="@{/admin/audit}" class="btn btn-back">← Back to Audit Log</a>
+    </div>
+
+    <div th:if="${history.totalElements == 0}" style="color:#6c757d; text-align:center; padding:3rem;">
+        No audit records found for this entity.
+    </div>
+
+    <div th:each="entry, stat : ${history.content}" class="entry-card">
+        <!-- Entry header -->
+        <div class="entry-header">
+            <span>
+                <span class="badge"
+                      th:classappend="'badge-' + ${entry.action}"
+                      th:text="${entry.action}">UPDATE</span>
+            </span>
+            <span>By: <strong th:text="${entry.changedByUsername}">admin</strong></span>
+            <span>At: <span th:text="${#temporals.format(entry.changedAt,'dd MMM yyyy HH:mm:ss')}">01 Jun</span></span>
+            <span th:if="${entry.ipAddress != null}">IP: <span th:text="${entry.ipAddress}">127.0.0.1</span></span>
+        </div>
+
+        <!-- JSON diff table -->
+        <div th:if="${not #maps.isEmpty(diffs[stat.index])}">
+            <table class="diff-table">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Before</th>
+                        <th>After</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="diffEntry : ${diffs[stat.index]}">
+                        <td th:text="${diffEntry.key}">price</td>
+                        <td class="old-val" th:text="${diffEntry.value[0] ?: '—'}">10.00</td>
+                        <td class="new-val" th:text="${diffEntry.value[1] ?: '—'}">12.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${#maps.isEmpty(diffs[stat.index])}" class="no-diff">
+            (No structured diff available — raw snapshots stored)
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display:flex; gap:.5rem; justify-content:center; margin-top:1rem;"
+         th:if="${history.totalPages > 1}">
+        <a th:each="i : ${#numbers.sequence(0, history.totalPages - 1)}"
+           th:href="@{/admin/audit/entity/{t}/{id}(t=${entityType},id=${entityId},page=${i})}"
+           th:text="${i + 1}"
+           style="padding:.35rem .7rem; border:1px solid #dee2e6; border-radius:4px;
+                  text-decoration:none; color:#2c3e50;">1</a>
+    </div>
+</div>
+</body>
+</html>

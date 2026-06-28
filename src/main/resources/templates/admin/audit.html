@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Audit Log')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'audit', 'Audit Log')}">
+<main>
+
+  <div class="page-header">
+    <h1 class="page-title">Audit Log</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="card" style="margin-bottom:var(--space-5);">
+    <div class="card-body" style="padding:var(--space-4);">
+      <form method="get" th:action="@{/admin/audit}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;min-width:150px;">
+          <label>Entity Type</label>
+          <select name="entityType" class="form-control" onchange="this.form.submit()">
+            <option value="">All Types</option>
+            <option value="ORDER"     th:selected="${param.entityType == 'ORDER'}">Order</option>
+            <option value="USER"      th:selected="${param.entityType == 'USER'}">User</option>
+            <option value="MENU_ITEM" th:selected="${param.entityType == 'MENU_ITEM'}">Menu Item</option>
+            <option value="TABLE"     th:selected="${param.entityType == 'TABLE'}">Table</option>
+            <option value="INVENTORY" th:selected="${param.entityType == 'INVENTORY'}">Inventory</option>
+            <option value="RESERVATION" th:selected="${param.entityType == 'RESERVATION'}">Reservation</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:150px;">
+          <label>Action</label>
+          <select name="action" class="form-control" onchange="this.form.submit()">
+            <option value="">All Actions</option>
+            <option value="CREATE" th:selected="${param.action == 'CREATE'}">Create</option>
+            <option value="UPDATE" th:selected="${param.action == 'UPDATE'}">Update</option>
+            <option value="DELETE" th:selected="${param.action == 'DELETE'}">Delete</option>
+            <option value="LOGIN"  th:selected="${param.action == 'LOGIN'}">Login</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:140px;">
+          <label>Date From</label>
+          <input type="date" name="from" class="form-control" th:value="${param.from}"/>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:140px;">
+          <label>Date To</label>
+          <input type="date" name="to" class="form-control" th:value="${param.to}"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a th:href="@{/admin/audit}" class="btn btn-outline btn-sm">Reset</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Timestamp</th><th>User</th><th>Action</th>
+            <th>Entity Type</th><th>Entity ID</th><th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="log : ${auditLogs.content}"
+              style="cursor:pointer;" onclick="showDiff(this)"
+              th:attr="data-diff=${log.changes}">
+            <td th:text="${#temporals.format(log.createdAt,'dd MMM yyyy HH:mm:ss')}">-</td>
+            <td th:text="${log.performedBy}">-</td>
+            <td>
+              <span class="badge"
+                    th:classappend="${log.action.name() == 'CREATE'} ? 'badge-success' :
+                                    (${log.action.name() == 'DELETE'} ? 'badge-danger' : 'badge-info')"
+                    th:text="${log.action}">-</span>
+            </td>
+            <td><code th:text="${log.entityType}">-</code></td>
+            <td th:text="${log.entityId}">-</td>
+            <td class="text-sm text-muted" th:text="${log.description}">-</td>
+          </tr>
+          <tr th:if="${auditLogs == null or auditLogs.totalElements == 0}">
+            <td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:48px;">
+              No audit entries found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer" th:if="${auditLogs.totalPages > 1}">
+      <nav class="pagination">
+        <a th:href="@{/admin/audit(page=${auditLogs.number - 1})}"
+           class="page-link" th:classappend="${auditLogs.first} ? 'disabled'">Prev</a>
+        <span th:each="i : ${#numbers.sequence(0, auditLogs.totalPages - 1)}">
+          <a class="page-link" th:classappend="${i == auditLogs.number} ? 'active'"
+             th:href="@{/admin/audit(page=${i})}" th:text="${i + 1}">1</a>
+        </span>
+        <a th:href="@{/admin/audit(page=${auditLogs.number + 1})}"
+           class="page-link" th:classappend="${auditLogs.last} ? 'disabled'">Next</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- JSON diff modal -->
+  <div class="modal-backdrop" id="diffModal">
+    <div class="modal" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>Change Details</h3>
+        <button class="modal-close" onclick="document.getElementById('diffModal').classList.remove('open')">x</button>
+      </div>
+      <div class="modal-body">
+        <pre id="diffContent" style="white-space:pre-wrap;word-break:break-all;font-size:var(--fs-xs);
+             background:var(--color-bg-alt);padding:16px;border-radius:8px;max-height:400px;overflow-y:auto;">
+        </pre>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+function showDiff(row) {
+  var raw = row.getAttribute('data-diff');
+  if (!raw) return;
+  try {
+    var parsed = JSON.parse(raw);
+    document.getElementById('diffContent').textContent = JSON.stringify(parsed, null, 2);
+  } catch(e) {
+    document.getElementById('diffContent').textContent = raw;
+  }
+  document.getElementById('diffModal').classList.add('open');
+}
+</script>
+</body>
+</html>

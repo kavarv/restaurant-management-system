@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('User Management')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'users', 'User Management')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">User Management</h1>
+      <p class="page-subtitle" th:text="${users.totalElements} + ' total users'"></p>
+    </div>
+    <a th:href="@{/register}" class="btn btn-primary">Add User</a>
+  </div>
+
+  <!-- Search -->
+  <div class="card" style="margin-bottom:var(--space-5);">
+    <div class="card-body" style="padding:var(--space-4);">
+      <form method="get" th:action="@{/admin/users}" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="search-wrapper" style="flex:1;min-width:200px;">
+          <span class="search-icon">&#128269;</span>
+          <input type="text" name="q" class="form-control" placeholder="Search by name or email..."
+                 th:value="${param.q}"/>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:140px;">
+          <label>Role</label>
+          <select name="role" class="form-control" onchange="this.form.submit()">
+            <option value="">All Roles</option>
+            <option value="ADMIN"   th:selected="${param.role == 'ADMIN'}">Admin</option>
+            <option value="MANAGER" th:selected="${param.role == 'MANAGER'}">Manager</option>
+            <option value="WAITER"  th:selected="${param.role == 'WAITER'}">Waiter</option>
+            <option value="CHEF"    th:selected="${param.role == 'CHEF'}">Chef</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Search</button>
+        <a th:href="@{/admin/users}" class="btn btn-outline btn-sm">Reset</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Username</th><th>Email</th><th>Role</th>
+            <th>Status</th><th>Created</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="u : ${users.content}">
+            <td th:text="${u.username}">-</td>
+            <td><code th:text="${u.username}">-</code></td>
+            <td th:text="${u.email}">-</td>
+            <td>
+              <span class="badge" th:classappend="'badge-' + ${u.role}" th:text="${u.role}">-</span>
+            </td>
+            <td>
+              <span class="badge"
+                    th:classappend="${u.isActive} ? 'badge-success' : 'badge-danger'"
+                    th:text="${u.isActive} ? 'Active' : 'Inactive'">Active</span>
+            </td>
+            <td th:text="${#temporals.format(u.createdAt,'dd MMM yyyy')}">-</td>
+            <td>
+              <div class="action-group">
+                <a th:href="@{/admin/users/{id}/edit(id=${u.id})}" class="btn btn-outline btn-sm">Edit</a>
+                <form th:if="${u.isActive}" th:action="@{/admin/users/{id}/deactivate(id=${u.id})}" method="post" style="display:inline;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <button type="submit" class="btn btn-warning btn-sm"
+                          onclick="return confirm('Deactivate this user?')">Deactivate</button>
+                </form>
+                <form th:if="${!u.isActive}" th:action="@{/admin/users/{id}/activate(id=${u.id})}" method="post" style="display:inline;">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <button type="submit" class="btn btn-success btn-sm">Activate</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${users == null or users.totalElements == 0}">
+            <td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:48px;">
+              No users found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer" th:if="${users.totalPages > 1}">
+      <nav class="pagination">
+        <a th:href="@{/admin/users(page=${users.number - 1})}"
+           class="page-link" th:classappend="${users.first} ? 'disabled'">Prev</a>
+        <span th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}">
+          <a class="page-link" th:classappend="${i == users.number} ? 'active'"
+             th:href="@{/admin/users(page=${i})}" th:text="${i + 1}">1</a>
+        </span>
+        <a th:href="@{/admin/users(page=${users.number + 1})}"
+           class="page-link" th:classappend="${users.last} ? 'disabled'">Next</a>
+      </nav>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>

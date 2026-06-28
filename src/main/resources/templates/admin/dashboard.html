@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard — RMS</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────── -->
+<nav class="topnav">
+    <span class="brand">🍽 RMS</span>
+    <div class="nav-links">
+        <a th:href="@{/admin/dashboard}" class="active">Dashboard</a>
+        <a th:href="@{/admin/users}">Users</a>
+        <a th:href="@{/inventory}">Inventory</a>
+        <a th:href="@{/reports}">Reports</a>
+        <a th:href="@{/orders}">Orders</a>
+    </div>
+    <div class="nav-user">
+        <!--
+          sec:authentication="name" renders the username from the SecurityContext.
+          Requires thymeleaf-extras-springsecurity6.
+        -->
+        <span>👤 <strong sec:authentication="name">Admin</strong></span>
+        <!--
+          th:action="@{/logout}" with method="post" — Spring Security intercepts POST /logout.
+          The CSRF token is auto-injected by Thymeleaf's th:action.
+        -->
+        <form th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn-logout">Sign out</button>
+        </form>
+    </div>
+</nav>
+
+<!-- ── Page header ─────────────────────────────────────────────────────── -->
+<main class="container">
+    <div class="page-header">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle" th:text="${#temporals.format(#temporals.createNow(), 'EEEE, d MMMM yyyy')}">Today</p>
+    </div>
+
+    <!-- ── Flash messages ──────────────────────────────────────────────── -->
+    <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+    <div th:if="${errorMsg}"   class="alert alert-error"   th:text="${errorMsg}"></div>
+
+    <!-- ── User stats ─────────────────────────────────────────────────── -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${totalUsers}">0</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${managerCount}">0</div>
+            <div class="stat-label">Managers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${waiterCount}">0</div>
+            <div class="stat-label">Waiters</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${chefCount}">0</div>
+            <div class="stat-label">Chefs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${customerCount}">0</div>
+            <div class="stat-label">Customers</div>
+        </div>
+        <!-- Today's revenue from DailySalesReport -->
+        <div class="stat-card highlight">
+            <div class="stat-value"
+                 th:text="${dailyReport != null ? '£' + #numbers.formatDecimal(dailyReport.totalRevenue, 1, 2) : '£0.00'}">£0.00</div>
+            <div class="stat-label">Today's Revenue</div>
+        </div>
+    </section>
+
+    <!-- ── Low stock alerts ─────────────────────────────────────────────── -->
+    <section class="section">
+        <h2>⚠️ Low Stock Alerts
+            <span class="badge" th:text="${lowStockItems != null ? lowStockItems.size() : 0}">0</span>
+        </h2>
+        <div th:if="${lowStockItems == null or lowStockItems.isEmpty()}" class="empty-state">
+            All inventory levels are healthy.
+        </div>
+        <table th:unless="${lowStockItems == null or lowStockItems.isEmpty()}" class="data-table">
+            <thead>
+                <tr><th>Item</th><th>Current Stock</th><th>Minimum</th><th>Unit</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${lowStockItems}" class="row-warning">
+                    <td th:text="${item.name}">-</td>
+                    <td th:text="${item.currentStock}">-</td>
+                    <td th:text="${item.minimumStock}">-</td>
+                    <td th:text="${item.unit}">-</td>
+                </tr>
+            </tbody>
+        </table>
+        <a th:href="@{/inventory}" class="btn btn-secondary">Manage Inventory →</a>
+    </section>
+
+    <!-- ── Quick actions ────────────────────────────────────────────────── -->
+    <section class="section">
+        <h2>Quick Actions</h2>
+        <div class="action-grid">
+            <a th:href="@{/admin/users}"  class="action-card">👥 Manage Users</a>
+            <a th:href="@{/inventory}"    class="action-card">📦 Inventory</a>
+            <a th:href="@{/reports}"      class="action-card">📊 Reports</a>
+            <a th:href="@{/orders}"       class="action-card">🧾 Orders</a>
+            <a th:href="@{/menu}"         class="action-card">🍽 Menu</a>
+            <a th:href="@{/tables}"       class="action-card">🪑 Tables</a>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>User Activity</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <style>
+        table { width:100%; border-collapse:collapse; font-size:.875rem; }
+        th, td { padding:.55rem .9rem; border:1px solid #dee2e6; }
+        th { background:#2c3e50; color:#fff; }
+        tr:nth-child(even) { background:#f8f9fa; }
+        .badge { padding:.2rem .5rem; border-radius:3px; font-size:.75rem; font-weight:600; }
+        .badge-CREATE  { background:#d4edda; color:#155724; }
+        .badge-UPDATE  { background:#fff3cd; color:#856404; }
+        .badge-DELETE  { background:#f8d7da; color:#721c24; }
+        .badge-RESTORE { background:#d1ecf1; color:#0c5460; }
+        .btn { padding:.4rem .9rem; border:none; border-radius:4px; cursor:pointer;
+               font-size:.875rem; text-decoration:none; background:#95a5a6; color:#fff; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h1>Activity for User #<span th:text="${userId}">5</span></h1>
+        <a th:href="@{/admin/audit}" class="btn">← Back to Audit Log</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Entity</th><th>Entity ID</th>
+                <th>Action</th><th>IP Address</th><th>Changed At</th><th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="entry : ${activity.content}">
+                <td th:text="${entry.id}">1</td>
+                <td th:text="${entry.entityType}">MenuItem</td>
+                <td th:text="${entry.entityId}">42</td>
+                <td>
+                    <span class="badge"
+                          th:classappend="'badge-' + ${entry.action}"
+                          th:text="${entry.action}">UPDATE</span>
+                </td>
+                <td th:text="${entry.ipAddress ?: '—'}">127.0.0.1</td>
+                <td th:text="${#temporals.format(entry.changedAt,'dd MMM yyyy HH:mm')}">01 Jun</td>
+                <td>
+                    <a th:href="@{/admin/audit/entity/{type}/{id}(type=${entry.entityType},id=${entry.entityId})}"
+                       style="font-size:.8rem; color:#2980b9;">history →</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
