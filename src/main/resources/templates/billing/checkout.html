@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Checkout')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'orders', 'Checkout')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Checkout</h1>
+      <p class="page-subtitle" th:text="'Order ' + ${order.orderNumber}"></p>
+    </div>
+    <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-outline btn-sm">Back to Order</a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:var(--space-6);align-items:start;">
+
+    <!-- Payment form -->
+    <div class="card">
+      <div class="card-header"><h3>Payment Details</h3></div>
+      <div class="card-body">
+        <form id="paymentForm">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrfInput"/>
+          <input type="hidden" id="orderId" th:value="${order.id}"/>
+
+          <!-- Payment method -->
+          <div class="form-group">
+            <label style="margin-bottom:var(--space-3);">Payment Method</label>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-3);">
+
+              <label class="card" style="padding:var(--space-4);cursor:pointer;display:flex;align-items:center;gap:12px;">
+                <input type="radio" name="paymentMethod" value="CASH" class="form-check-input" checked
+                       onchange="handleMethodChange(this)"/>
+                <span style="font-size:1.5rem;">&#128181;</span>
+                <span style="font-weight:600;">Cash</span>
+              </label>
+
+              <label class="card" style="padding:var(--space-4);cursor:pointer;display:flex;align-items:center;gap:12px;">
+                <input type="radio" name="paymentMethod" value="CARD" class="form-check-input"
+                       onchange="handleMethodChange(this)"/>
+                <span style="font-size:1.5rem;">&#128179;</span>
+                <span style="font-weight:600;">Card</span>
+              </label>
+
+              <label class="card" style="padding:var(--space-4);cursor:pointer;display:flex;align-items:center;gap:12px;">
+                <input type="radio" name="paymentMethod" value="UPI" class="form-check-input"
+                       onchange="handleMethodChange(this)"/>
+                <span style="font-size:1.5rem;">&#128242;</span>
+                <span style="font-weight:600;">UPI</span>
+              </label>
+
+              <label class="card" style="padding:var(--space-4);cursor:pointer;display:flex;align-items:center;gap:12px;">
+                <input type="radio" name="paymentMethod" value="WALLET" class="form-check-input"
+                       onchange="handleMethodChange(this)"/>
+                <span style="font-size:1.5rem;">&#128081;</span>
+                <span style="font-weight:600;">Wallet</span>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- Transaction reference (Card/UPI/Wallet) -->
+          <div class="form-group" id="txRefGroup" style="display:none;">
+            <label for="transactionRef">Transaction Reference</label>
+            <input type="text" id="transactionRef" name="transactionReference"
+                   class="form-control" placeholder="e.g. TXN123456789"/>
+          </div>
+
+          <!-- Amount paid (for cash) -->
+          <div class="form-group" id="amountPaidGroup">
+            <label for="amountPaid">Amount Tendered (RM)</label>
+            <input type="number" id="amountPaid" name="amountPaid" class="form-control"
+                   step="0.01" min="0"
+                   th:value="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"/>
+            <span class="form-hint" id="changeHint"></span>
+          </div>
+
+          <!-- Optional tip -->
+          <div class="form-group">
+            <label>Tip (optional)</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="pill" onclick="setTip(0)">No tip</button>
+              <button type="button" class="pill" onclick="setTip(5)">5%</button>
+              <button type="button" class="pill" onclick="setTip(10)">10%</button>
+              <button type="button" class="pill" onclick="setTip(15)">15%</button>
+            </div>
+            <input type="hidden" id="tipPercent" value="0"/>
+          </div>
+
+          <div id="paymentError" class="alert alert-danger" style="display:none;"></div>
+
+          <button type="button" class="btn btn-primary btn-block"
+                  onclick="openPaymentConfirm()" style="margin-top:var(--space-4);">
+            Process Payment
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order summary (read-only) -->
+    <div>
+      <div class="card">
+        <div class="card-header"><h3>Order Summary</h3></div>
+        <div class="card-body" style="padding:var(--space-4);">
+          <div class="text-sm text-muted" style="margin-bottom:var(--space-3);">
+            <span th:text="${order.tableNumber != null ? 'Table ' + order.tableNumber : 'Takeaway'}"></span>
+            &bull; <span th:text="${order.orderType}"></span>
+          </div>
+          <div class="kds-items" style="margin-bottom:var(--space-4);">
+            <div th:each="item : ${order.items}" style="display:flex;justify-content:space-between;font-size:var(--fs-sm);padding:4px 0;">
+              <span th:text="${item.quantity} + 'x ' + ${item.menuItemName}">-</span>
+              <span th:text="'RM ' + ${#numbers.formatDecimal(item.unitPrice * item.quantity, 1, 2)}">RM 0.00</span>
+            </div>
+          </div>
+          <hr class="divider" style="margin:12px 0;"/>
+          <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:4px;">
+            <span>Subtotal</span>
+            <span th:text="'RM ' + ${#numbers.formatDecimal(order.subtotal, 1, 2)}">RM 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:4px;">
+            <span>Tax (10%)</span>
+            <span th:text="'RM ' + ${#numbers.formatDecimal(order.taxAmount, 1, 2)}">RM 0.00</span>
+          </div>
+          <div id="tipRow" style="display:none;justify-content:space-between;font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:4px;">
+            <span>Tip</span>
+            <span id="tipDisplay">RM 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--fs-lg);margin-top:8px;">
+            <span>Total</span>
+            <span id="grandTotal" th:text="'RM ' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">RM 0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Confirm payment modal -->
+  <div class="modal-backdrop" id="confirmPaymentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Confirm Payment</h3>
+        <button class="modal-close" onclick="closeModal('confirmPaymentModal')">x</button>
+      </div>
+      <div class="modal-body" id="confirmPaymentBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('confirmPaymentModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="submitPayment()">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt (shown after payment) -->
+  <div id="receiptSection" style="display:none;">
+    <div class="receipt-wrapper no-print" style="margin-bottom:var(--space-4);display:flex;gap:12px;">
+      <button onclick="window.print()" class="btn btn-primary">Print Receipt</button>
+      <a th:href="@{/orders}" class="btn btn-outline">Back to Orders</a>
+    </div>
+    <div class="receipt" id="receiptContent">
+      <!-- Filled dynamically by JS -->
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script th:inline="javascript">
+(function () {
+  var orderTotal = /*[[${order.totalAmount}]]*/ 0;
+  var orderNumber = /*[[${order.orderNumber}]]*/ '-';
+  var csrf = document.getElementById('csrfInput').value;
+  var orderId = document.getElementById('orderId').value;
+  var tipAmount = 0;
+
+  function handleMethodChange(radio) {
+    var method = radio.value;
+    document.getElementById('txRefGroup').style.display = (method !== 'CASH') ? 'block' : 'none';
+    document.getElementById('amountPaidGroup').style.display = (method === 'CASH') ? 'block' : 'none';
+  }
+  window.handleMethodChange = handleMethodChange;
+
+  function setTip(pct) {
+    document.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('active'); });
+    event.target.classList.add('active');
+    document.getElementById('tipPercent').value = pct;
+    tipAmount = (orderTotal * pct / 100);
+    var total = orderTotal + tipAmount;
+    var tipRow = document.getElementById('tipRow');
+    tipRow.style.display = pct > 0 ? 'flex' : 'none';
+    document.getElementById('tipDisplay').textContent = 'RM ' + tipAmount.toFixed(2);
+    document.getElementById('grandTotal').textContent = 'RM ' + total.toFixed(2);
+    document.getElementById('amountPaid').value = total.toFixed(2);
+  }
+  window.setTip = setTip;
+
+  document.getElementById('amountPaid').addEventListener('input', function() {
+    var paid = parseFloat(this.value) || 0;
+    var total = orderTotal + tipAmount;
+    var change = paid - total;
+    var hint = document.getElementById('changeHint');
+    hint.textContent = change >= 0 ? 'Change: RM ' + change.toFixed(2) : 'Amount insufficient';
+    hint.style.color = change >= 0 ? 'var(--color-success)' : 'var(--color-danger)';
+  });
+
+  function openPaymentConfirm() {
+    var method = document.querySelector('input[name="paymentMethod"]:checked').value;
+    var total = orderTotal + tipAmount;
+    var body = document.getElementById('confirmPaymentBody');
+    body.innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:12px;">' +
+      '<div style="display:flex;justify-content:space-between;"><span>Order</span><strong>' + orderNumber + '</strong></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Method</span><strong>' + method + '</strong></div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:1.1rem;border-top:1px solid var(--color-border);padding-top:12px;margin-top:4px;">' +
+      '<span>Total</span><strong>RM ' + total.toFixed(2) + '</strong></div></div>';
+    document.getElementById('confirmPaymentModal').classList.add('open');
+  }
+  window.openPaymentConfirm = openPaymentConfirm;
+
+  function submitPayment() {
+    var method = document.querySelector('input[name="paymentMethod"]:checked').value;
+    var txRef = document.getElementById('transactionRef') ? document.getElementById('transactionRef').value : null;
+    var amtPaid = parseFloat(document.getElementById('amountPaid').value) || (orderTotal + tipAmount);
+    var tip = parseInt(document.getElementById('tipPercent').value) || 0;
+
+    fetch('/api/v1/payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrf
+      },
+      body: JSON.stringify({
+        orderId: parseInt(orderId),
+        paymentMethod: method,
+        transactionId: txRef,
+        amount: amtPaid
+      })
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Payment failed');
+      return r.json();
+    })
+    .then(function(data) {
+      document.getElementById('confirmPaymentModal').classList.remove('open');
+      showReceipt(data);
+    })
+    .catch(function(err) {
+      document.getElementById('confirmPaymentModal').classList.remove('open');
+      var errDiv = document.getElementById('paymentError');
+      errDiv.textContent = err.message;
+      errDiv.style.display = 'flex';
+    });
+  }
+  window.submitPayment = submitPayment;
+
+  function showReceipt(payment) {
+    document.getElementById('receiptSection').style.display = 'block';
+    window.scrollTo(0, document.getElementById('receiptSection').offsetTop);
+    document.getElementById('receiptContent').innerHTML =
+      '<div class="receipt-header">' +
+      '<div style="font-size:1.3rem;font-weight:700;">Restaurant Management System</div>' +
+      '<div style="font-size:0.8rem;margin-top:4px;">Thank you for dining with us!</div></div>' +
+      '<hr class="receipt-divider"/>' +
+      '<div class="receipt-row"><span>Order #</span><span>' + (payment.orderNumber || orderNumber) + '</span></div>' +
+      '<div class="receipt-row"><span>Date</span><span>' + new Date().toLocaleString() + '</span></div>' +
+      '<hr class="receipt-divider"/>' +
+      '<div class="receipt-row receipt-total"><span>Total Paid</span><span>RM ' + (payment.amountPaid || (orderTotal + tipAmount)).toFixed(2) + '</span></div>' +
+      '<div class="receipt-row"><span>Method</span><span>' + (payment.paymentMethod || '') + '</span></div>' +
+      '<hr class="receipt-divider"/>' +
+      '<div class="receipt-footer">Thank you! Please come again.</div>';
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  window.closeModal = closeModal;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Reservation Detail')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'reservations', 'Reservation Detail')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Reservation Detail</h1>
+      <p class="page-subtitle" th:text="'Code: ' + ${reservation.confirmationCode}">Code</p>
+    </div>
+    <div class="action-group">
+      <a th:href="@{/reservations}" class="btn btn-outline btn-sm">Back</a>
+      <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+        <form th:if="${reservation.status.name() == 'PENDING'}"
+              th:action="@{/reservations/{id}/confirm(id=${reservation.id})}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <button type="submit" class="btn btn-success btn-sm">Confirm</button>
+        </form>
+        <form th:if="${reservation.status.name() != 'CANCELLED' and reservation.status.name() != 'COMPLETED'}"
+              th:action="@{/reservations/{id}/cancel(id=${reservation.id})}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <button type="submit" class="btn btn-danger btn-sm"
+                  onclick="return confirm('Cancel this reservation?')">Cancel</button>
+        </form>
+      </sec:authorize>
+    </div>
+  </div>
+
+  <div style="max-width:680px;">
+    <div class="card">
+      <div class="card-header">
+        <h3>Booking Information</h3>
+        <span class="badge" th:classappend="'badge-' + ${reservation.status}" th:text="${reservation.status}">-</span>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5);">
+
+          <div>
+            <div class="text-xs text-muted">Customer</div>
+            <div class="font-bold" th:text="${reservation.customerName ?: 'N/A'}">-</div>
+            <div class="text-sm text-muted" th:text="${reservation.customerEmail}">-</div>
+            <div class="text-sm text-muted" th:text="${reservation.customerPhone}">-</div>
+          </div>
+
+          <div>
+            <div class="text-xs text-muted">Table</div>
+            <div th:text="${reservation.tableNumber != null ? 'Table ' + reservation.tableNumber : 'N/A'}">-</div>
+            <div class="text-sm text-muted" th:text="${reservation.tableCapacity != null ? reservation.tableCapacity + ' seats' : ''}">-</div>
+          </div>
+
+          <div>
+            <div class="text-xs text-muted">Date &amp; Time</div>
+            <div th:text="${#temporals.format(reservation.reservedDate, 'dd MMM yyyy HH:mm')}">-</div>
+          </div>
+
+          <div>
+            <div class="text-xs text-muted">Party Size</div>
+            <div th:text="${reservation.partySize} + ' guests'">-</div>
+          </div>
+
+          <div th:if="${reservation.notes != null and !#strings.isEmpty(reservation.notes)}" style="grid-column:1/-1;">
+            <div class="text-xs text-muted">Notes</div>
+            <div th:text="${reservation.notes}">-</div>
+          </div>
+
+          <div>
+            <div class="text-xs text-muted">Booked On</div>
+            <div th:text="${#temporals.format(reservation.createdAt, 'dd MMM yyyy HH:mm')}">-</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>
