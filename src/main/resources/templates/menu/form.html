@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Menu Item')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'menu', 'Menu Item')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title" th:text="${item != null} ? 'Edit Menu Item' : 'New Menu Item'">Menu Item</h1>
+    </div>
+    <a th:href="@{/menu}" class="btn btn-outline btn-sm">Back to Menu</a>
+  </div>
+
+  <div style="max-width:640px;">
+    <div class="card">
+      <div class="card-body">
+
+        <!--
+          novalidate is intentionally REMOVED so the browser's HTML5 constraint
+          validation fires before the form is submitted.  Server-side Bean Validation
+          still runs as a second layer of defence.  Each input carries HTML5 attributes
+          (required, minlength, maxlength, min, max, pattern) that mirror the
+          @NotBlank / @Size / @Positive / @Max annotations on MenuItemRequest.
+        -->
+        <form th:action="${item != null} ? @{/menu/{id}(id=${item.id})} : @{/menu}"
+              th:object="${menuItemRequest}"
+              method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+          <!-- Global errors -->
+          <div class="alert alert-danger"
+               th:if="${#fields.hasGlobalErrors()}"
+               th:errors="*{global}"></div>
+
+          <div class="form-group">
+            <label for="name">Item Name <span style="color:var(--color-danger)">*</span></label>
+            <!-- @NotBlank + @Size(min=2, max=150) -->
+            <input type="text" id="name" th:field="*{name}" class="form-control"
+                   required minlength="2" maxlength="150"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" placeholder="e.g. Nasi Lemak"/>
+            <span class="form-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <!-- @Size(max=2000) -->
+            <textarea id="description" th:field="*{description}" class="form-control" rows="3"
+                      maxlength="2000"
+                      placeholder="Short description shown to customers"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="price">Price (RM) <span style="color:var(--color-danger)">*</span></label>
+              <!-- @NotNull + @Positive (> 0) + @Digits(integer=8, fraction=2) -->
+              <input type="number" id="price" th:field="*{price}" class="form-control"
+                     required step="0.01" min="0.01" max="99999999.99"
+                     th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"/>
+              <span class="form-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+            </div>
+            <div class="form-group">
+              <label for="categoryId">Category <span style="color:var(--color-danger)">*</span></label>
+              <!-- @NotNull + @Positive -->
+              <select id="categoryId" th:field="*{categoryId}" class="form-control"
+                      required
+                      th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                <option value="">-- Select category --</option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}">Category</option>
+              </select>
+              <span class="form-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="preparationTimeMinutes">Prep Time (min)</label>
+              <!-- @Max(300); no @Min so 0 is allowed -->
+              <input type="number" id="preparationTimeMinutes" th:field="*{preparationTimeMinutes}"
+                     class="form-control" min="0" max="300" step="1"/>
+            </div>
+            <div class="form-group">
+              <label for="calories">Calories</label>
+              <!-- @Max(5000) -->
+              <input type="number" id="calories" th:field="*{calories}"
+                     class="form-control" min="0" max="5000" step="1"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="imageUrl">Image URL</label>
+            <!-- @Size(max=500); type="url" gives built-in URL pattern validation -->
+            <input type="url" id="imageUrl" th:field="*{imageUrl}" class="form-control"
+                   maxlength="500" placeholder="https://..."/>
+          </div>
+
+          <div style="display:flex;gap:var(--space-5);flex-wrap:wrap;margin-bottom:var(--space-5);">
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{isAvailable}"/> Available
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{isVegetarian}"/> Vegetarian
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{isVegan}"/> Vegan
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" th:field="*{isGlutenFree}"/> Gluten-Free
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <a th:href="@{/menu}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary"
+                    th:text="${item != null} ? 'Save Changes' : 'Create Item'">Save</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>
