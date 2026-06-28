@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Orders')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'orders', 'Orders')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Orders</h1>
+      <p class="page-subtitle" th:if="${orders != null}" th:text="${orders.totalElements} + ' total orders'"></p>
+    </div>
+    <a th:href="@{/orders/new}" class="btn btn-primary">New Order</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card" style="margin-bottom:var(--space-5);">
+    <div class="card-body" style="padding:var(--space-4);">
+      <form method="get" th:action="@{/orders}" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:140px;">
+          <label>Status</label>
+          <select name="status" class="form-control" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            <option value="PENDING"   th:selected="${param.status == 'PENDING'}">Pending</option>
+            <option value="CONFIRMED" th:selected="${param.status == 'CONFIRMED'}">Confirmed</option>
+            <option value="PREPARING" th:selected="${param.status == 'PREPARING'}">Preparing</option>
+            <option value="READY"     th:selected="${param.status == 'READY'}">Ready</option>
+            <option value="SERVED"    th:selected="${param.status == 'SERVED'}">Served</option>
+            <option value="COMPLETED" th:selected="${param.status == 'COMPLETED'}">Completed</option>
+            <option value="CANCELLED" th:selected="${param.status == 'CANCELLED'}">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:140px;">
+          <label>Date From</label>
+          <input type="date" name="from" class="form-control" th:value="${param.from}"/>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:140px;">
+          <label>Date To</label>
+          <input type="date" name="to" class="form-control" th:value="${param.to}"/>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:140px;">
+          <label>Table #</label>
+          <input type="text" name="tableNumber" class="form-control"
+                 th:value="${param.tableNumber}" placeholder="e.g. 5"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a th:href="@{/orders}" class="btn btn-outline btn-sm">Reset</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bulk actions (Admin/Manager) -->
+  <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+    <div id="bulkActions" style="display:none;margin-bottom:var(--space-4);">
+      <span id="selectedCount" class="text-sm text-muted" style="margin-right:12px;">0 selected</span>
+      <button class="btn btn-danger btn-sm" onclick="bulkCancel()">Cancel Selected</button>
+    </div>
+  </sec:authorize>
+
+  <!-- Orders table -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table" id="ordersTable">
+        <thead>
+          <tr>
+            <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+              <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"/></th>
+            </sec:authorize>
+            <th>Order #</th>
+            <th>Table</th>
+            <th>Waiter</th>
+            <th>Type</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Placed</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="o : ${orders.content}" th:if="${orders != null}">
+            <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+              <td><input type="checkbox" class="order-check" th:value="${o.id}" onchange="updateBulkActions()"/></td>
+            </sec:authorize>
+            <td><strong th:text="${o.orderNumber}">-</strong></td>
+            <td th:text="${o.tableNumber != null ? 'T-' + o.tableNumber : '-'}">-</td>
+            <td th:text="${o.waiterName}">-</td>
+            <td>
+              <span class="badge badge-neutral" th:text="${o.orderType}">-</span>
+            </td>
+            <td th:text="${o.itemCount}">0</td>
+            <td th:text="'RM ' + ${#numbers.formatDecimal(o.totalAmount, 1, 2)}">RM 0.00</td>
+            <td>
+              <span class="badge" th:classappend="'badge-' + ${o.status}" th:text="${o.status}">-</span>
+            </td>
+            <td th:text="${#temporals.format(o.createdAt,'dd MMM yyyy HH:mm')}">-</td>
+            <td>
+              <div class="action-group">
+                <a th:href="@{/orders/{id}(id=${o.id})}" class="btn btn-outline btn-sm">View</a>
+                <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+                  <form th:action="@{/orders/{id}/cancel(id=${o.id})}" method="post" style="display:inline;"
+                        th:if="${o.status != 'COMPLETED' and o.status != 'CANCELLED'}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Cancel this order?')">Cancel</button>
+                  </form>
+                </sec:authorize>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${orders == null or orders.totalElements == 0}">
+            <td colspan="10" style="text-align:center;color:var(--color-text-muted);padding:48px;">
+              No orders found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="card-footer" th:if="${orders != null and orders.totalPages > 1}">
+      <nav class="pagination">
+        <a th:href="@{/orders(page=${orders.number - 1}, size=${orders.size}, status=${param.status})}"
+           class="page-link" th:classappend="${orders.first} ? 'disabled' ? ''">Prev</a>
+        <span th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
+          <a class="page-link" th:classappend="${i == orders.number} ? 'active'"
+             th:href="@{/orders(page=${i}, size=${orders.size}, status=${param.status})}"
+             th:text="${i + 1}">1</a>
+        </span>
+        <a th:href="@{/orders(page=${orders.number + 1}, size=${orders.size}, status=${param.status})}"
+           class="page-link" th:classappend="${orders.last} ? 'disabled' ? ''">Next</a>
+      </nav>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.order-check').forEach(c => { c.checked = cb.checked; });
+  updateBulkActions();
+}
+function updateBulkActions() {
+  var checked = document.querySelectorAll('.order-check:checked').length;
+  var panel = document.getElementById('bulkActions');
+  if (panel) { panel.style.display = checked > 0 ? 'block' : 'none'; }
+  var cnt = document.getElementById('selectedCount');
+  if (cnt) cnt.textContent = checked + ' selected';
+}
+function bulkCancel() {
+  var ids = Array.from(document.querySelectorAll('.order-check:checked')).map(c => c.value);
+  if (!ids.length || !confirm('Cancel ' + ids.length + ' order(s)?')) return;
+  var csrf = document.querySelector('meta[name="_csrf"]');
+  fetch('/api/v1/orders/bulk-cancel', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json',
+      [document.querySelector('meta[name="_csrf_header"]').content]: csrf ? csrf.content : '' },
+    body: JSON.stringify({ orderIds: ids })
+  }).then(function(r){ if(r.ok) location.reload(); });
+}
+</script>
+</body>
+</html>

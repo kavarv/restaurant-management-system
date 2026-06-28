@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('New Order')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'new-order', 'New Order')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">New Order</h1>
+      <p class="page-subtitle">Select items and configure the order</p>
+    </div>
+  </div>
+
+  <!-- Hidden CSRF for fetch() calls -->
+  <meta th:attr="content=${_csrf.token}" id="csrfToken"/>
+  <meta th:attr="content=${_csrf.headerName}" id="csrfHeader"/>
+
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:var(--space-6);align-items:start;">
+
+    <!-- LEFT: Menu browser -->
+    <div>
+      <!-- Category pills -->
+      <div class="pills" id="categoryPills" style="margin-bottom:var(--space-4);">
+        <button class="pill active" data-category="all" onclick="filterCategory(this)">All</button>
+        <button th:each="cat : ${categories}" class="pill"
+                th:attr="data-category=${cat.id}"
+                th:text="${cat.name}"
+                onclick="filterCategory(this)">Category</button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-wrapper" style="margin-bottom:var(--space-4);">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" id="menuSearch" class="form-control"
+               placeholder="Search menu items..." oninput="debounceSearch(this.value)"/>
+      </div>
+
+      <!-- Menu cards grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--space-4);"
+           id="menuGrid">
+
+        <div th:each="item : ${menuItems.content}"
+             class="menu-card"
+             th:classappend="${!item.available} ? 'unavailable'"
+             th:attr="data-category=${item.categoryId},
+                      data-name=${item.name},
+                      data-id=${item.id},
+                      data-price=${item.price},
+                      data-available=${item.available}">
+
+          <!-- Image or placeholder -->
+          <img th:if="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}"
+               th:src="${item.imageUrl}" th:alt="${item.name}" class="menu-card-img"/>
+          <div th:if="${item.imageUrl == null or #strings.isEmpty(item.imageUrl)}"
+               class="menu-card-img-placeholder">&#127829;</div>
+
+          <div class="menu-card-body">
+            <div class="menu-card-name" th:text="${item.name}">Item</div>
+
+            <!-- Dietary icons -->
+            <div class="dietary-icons">
+              <span class="dietary-icon" th:if="${item.vegetarian}">&#127807; Veg</span>
+              <span class="dietary-icon" th:if="${item.vegan}">&#127807;&#127807; Vegan</span>
+              <span class="dietary-icon" th:if="${item.glutenFree}">GF</span>
+            </div>
+
+            <div class="menu-card-price" th:text="'RM ' + ${#numbers.formatDecimal(item.price, 1, 2)}">RM 0.00</div>
+            <button class="btn btn-primary btn-sm"
+                    th:if="${item.available}"
+                    th:attr="onclick='addToCart(' + ${item.id} + ', \'' + ${item.name} + '\', ' + ${item.price} + ')'"
+                    style="margin-top:auto;">
+              + Add
+            </button>
+            <span th:if="${!item.available}" class="badge badge-neutral">Unavailable</span>
+          </div>
+        </div>
+
+        <div id="noResults" style="display:none;grid-column:1/-1;" class="empty-state">
+          <div class="empty-state-icon">&#128270;</div>
+          <h3>No items found</h3>
+          <p>Try a different search term.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Cart panel -->
+    <div class="card" style="position:sticky;top:calc(var(--topbar-height) + 16px);">
+      <div class="card-header">
+        <h3>Current Order</h3>
+        <span id="cartItemCount" class="badge badge-neutral">0 items</span>
+      </div>
+
+      <div class="card-body" style="padding:var(--space-4);">
+
+        <!-- Order type toggle -->
+        <div style="display:flex;gap:8px;margin-bottom:var(--space-4);">
+          <button class="pill active" id="btnDineIn" onclick="setOrderType('DINE_IN')">Dine In</button>
+          <button class="pill" id="btnTakeaway" onclick="setOrderType('TAKEAWAY')">Takeaway</button>
+        </div>
+
+        <!-- Table selector (shown for DINE_IN) -->
+        <div class="form-group" id="tableGroup">
+          <label for="tableSelect">Table</label>
+          <select id="tableSelect" class="form-control">
+            <option value="">-- Select table --</option>
+            <option th:each="t : ${tables}" th:value="${t.id}"
+                    th:text="'Table ' + ${t.tableNumber} + ' (' + ${t.capacity} + ' seats)'">Table</option>
+          </select>
+        </div>
+
+        <!-- Cart items -->
+        <div id="cartItems" style="min-height:80px;margin-bottom:var(--space-4);">
+          <div id="emptyCart" style="text-align:center;color:var(--color-text-muted);padding:24px 0;font-size:var(--fs-sm);">
+            No items added yet.<br/>Select items from the menu.
+          </div>
+        </div>
+
+        <!-- Totals -->
+        <div style="border-top:1px solid var(--color-border);padding-top:var(--space-3);">
+          <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:4px;">
+            <span>Subtotal</span><span id="subtotal">RM 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:4px;color:var(--color-text-muted);">
+            <span>Tax (10%)</span><span id="tax">RM 0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:var(--fs-md);margin-top:8px;">
+            <span>Total</span><span id="total">RM 0.00</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-footer">
+        <button class="btn btn-primary btn-block" id="placeOrderBtn"
+                onclick="openOrderConfirm()" disabled>
+          Place Order
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Confirm order modal -->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Confirm Order</h3>
+        <button class="modal-close" onclick="closeModal('confirmModal')">x</button>
+      </div>
+      <div class="modal-body" id="confirmModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('confirmModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="confirmPlaceBtn" onclick="placeOrder()">
+          Confirm &amp; Place Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+<script th:src="@{/js/orders.js}"></script>
+</body>
+</html>

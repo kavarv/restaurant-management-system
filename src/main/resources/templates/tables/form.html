@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Table')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'tables', 'Table')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title" th:text="${table != null} ? 'Edit Table' : 'New Table'">Table</h1>
+    </div>
+    <a th:href="@{/tables}" class="btn btn-outline btn-sm">Back to Floor Plan</a>
+  </div>
+
+  <div style="max-width:480px;">
+    <div class="card">
+      <div class="card-body">
+
+        <form th:action="${table != null} ? @{/tables/{id}(id=${table.id})} : @{/tables}"
+              th:object="${tableRequest}"
+              method="post" novalidate>
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+          <div class="alert alert-danger"
+               th:if="${#fields.hasGlobalErrors()}"
+               th:errors="*{global}"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tableNumber">Table Number <span style="color:var(--color-danger)">*</span></label>
+              <input type="number" id="tableNumber" th:field="*{tableNumber}" class="form-control"
+                     min="1"
+                     th:classappend="${#fields.hasErrors('tableNumber')} ? 'is-invalid'"
+                     placeholder="e.g. 5"/>
+              <span class="form-error" th:if="${#fields.hasErrors('tableNumber')}" th:errors="*{tableNumber}"></span>
+            </div>
+            <div class="form-group">
+              <label for="capacity">Capacity <span style="color:var(--color-danger)">*</span></label>
+              <input type="number" id="capacity" th:field="*{capacity}" class="form-control"
+                     min="1" max="50"
+                     th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid'"/>
+              <span class="form-error" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" th:field="*{status}" class="form-control">
+              <option value="AVAILABLE">Available</option>
+              <option value="OCCUPIED">Occupied</option>
+              <option value="RESERVED">Reserved</option>
+              <option value="MAINTENANCE">Maintenance</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="locationDescription">Location / Notes</label>
+            <input type="text" id="locationDescription" th:field="*{locationDescription}"
+                   class="form-control" placeholder="e.g. Window seat, near bar"/>
+          </div>
+
+          <div class="form-actions">
+            <a th:href="@{/tables}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary"
+                    th:text="${table != null} ? 'Save Changes' : 'Create Table'">Save</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>
