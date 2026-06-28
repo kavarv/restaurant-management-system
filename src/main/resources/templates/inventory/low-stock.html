@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Low Stock Alert')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'inventory', 'Low Stock Alert')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Low Stock Alert</h1>
+      <p class="page-subtitle">Items at or below minimum stock level</p>
+    </div>
+    <div class="action-group">
+      <a th:href="@{/inventory}" class="btn btn-outline btn-sm">All Inventory</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Unit</th>
+            <th>Current Stock</th>
+            <th>Minimum Stock</th>
+            <th>Shortfall</th>
+            <th>Status</th>
+            <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+              <th>Actions</th>
+            </sec:authorize>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="item : ${items}"
+              th:classappend="${item.currentStock == 0} ? 'row-danger' : 'row-warning'">
+            <td><strong th:text="${item.name}">-</strong></td>
+            <td th:text="${item.unit}">-</td>
+            <td>
+              <strong th:text="${item.currentStock}">0</strong>
+            </td>
+            <td th:text="${item.minimumStock}">0</td>
+            <td>
+              <span style="color:var(--color-danger);font-weight:600;"
+                    th:text="${item.minimumStock - item.currentStock} + ' ' + ${item.unit}">0</span>
+            </td>
+            <td>
+              <span class="badge"
+                    th:classappend="${item.currentStock == 0} ? 'badge-danger' : 'badge-warning'"
+                    th:text="${item.currentStock == 0} ? 'OUT OF STOCK' : 'LOW STOCK'">LOW</span>
+            </td>
+            <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
+              <td>
+                <a th:href="@{/inventory/{id}/adjust(id=${item.id})}" class="btn btn-primary btn-sm">Adjust Stock</a>
+              </td>
+            </sec:authorize>
+          </tr>
+          <tr th:if="${items == null or #lists.isEmpty(items)}">
+            <td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:48px;">
+              All stock levels are healthy.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>
