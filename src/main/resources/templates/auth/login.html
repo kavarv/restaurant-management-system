@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!--
+  Thymeleaf namespace declarations:
+    xmlns:th   — standard Thymeleaf expressions (@{}, ${}, th:*)
+    xmlns:sec  — Spring Security extras (sec:authorize, sec:authentication)
+                 requires thymeleaf-extras-springsecurity6 on classpath
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login — Restaurant Management System</title>
+
+    <!--
+      th:href="@{/css/login.css}" resolves to the context-path-aware URL.
+      e.g. if deployed under /rms, becomes /rms/css/login.css automatically.
+      Spring Security's SecurityConfig permits /css/** without authentication.
+    -->
+    <link rel="stylesheet" th:href="@{/css/login.css}"/>
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <div class="login-card">
+
+        <!-- ── Branding ───────────────────────────────────────────────── -->
+        <div class="login-header">
+            <img th:src="@{/images/logo.png}" alt="Restaurant Logo" class="logo"
+                 onerror="this.style.display='none'"/>
+            <h1>Restaurant Management</h1>
+            <p class="subtitle">Sign in to continue</p>
+        </div>
+
+        <!-- ── Flash messages ─────────────────────────────────────────── -->
+
+        <!--
+          Spring Security appends ?error=true to the failureUrl when credentials
+          are wrong.  Thymeleaf checks the query param with th:if="${param.error}".
+          The message is deliberately vague — don't reveal whether the username
+          or the password was wrong (prevents username enumeration).
+        -->
+        <div th:if="${param.error}" class="alert alert-error" role="alert">
+            Invalid username/email or password. Please try again.
+        </div>
+
+        <!--
+          Spring Security appends ?logout=true after a successful logout.
+          The SecurityConfig logout block sets logoutSuccessUrl("/login?logout=true").
+        -->
+        <div th:if="${param.logout}" class="alert alert-success" role="alert">
+            You have been signed out successfully.
+        </div>
+
+        <!--
+          Spring Security appends ?expired=true when a session is invalidated
+          because the user logged in on a second device (maximumSessions(1)
+          with maxSessionsPreventsLogin(false) — new login wins, old session expires).
+        -->
+        <div th:if="${param.expired}" class="alert alert-warning" role="alert">
+            Your session expired because you signed in from another device.
+        </div>
+
+        <!-- ── Login form ──────────────────────────────────────────────── -->
+
+        <!--
+          CRITICAL — th:action="@{/login}" does TWO things:
+            1. Resolves the context-path-aware POST URL (/login).
+            2. Automatically injects a hidden CSRF token input:
+                 <input type="hidden" name="_csrf" value="abc123...">
+               This is handled by CsrfTokenRequestAttributeHandler (configured
+               in SecurityConfig).  You must use th:action, NOT plain action="/login",
+               otherwise the CSRF input is NOT injected and every POST returns 403.
+
+          method="post" — Spring Security's form login filter listens on
+          POST /login (loginProcessingUrl in SecurityConfig). GET /login
+          serves this page; POST /login authenticates.
+        -->
+        <form th:action="@{/login}" method="post" class="login-form" novalidate>
+
+            <!-- Username or email field -->
+            <!--
+              name="username" must match the usernameParameter("username") value
+              in SecurityConfig's formLogin() block.
+              Our UserDetailsServiceImpl accepts either a username OR an email
+              address here — both resolve to the same account.
+            -->
+            <div class="form-group">
+                <label for="username">Username or Email</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-control"
+                    placeholder="Enter your username or email"
+                    autocomplete="username"
+                    autofocus
+                    required
+                />
+            </div>
+
+            <!-- Password field -->
+            <!--
+              name="password" must match passwordParameter("password") in SecurityConfig.
+              autocomplete="current-password" lets password managers fill this correctly.
+            -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    />
+                    <!-- Toggle button — wired in login.js -->
+                    <button type="button" class="toggle-password" aria-label="Show password">
+                        👁
+                    </button>
+                </div>
+            </div>
+
+            <!--
+              Remember-me checkbox.
+              Spring Security supports remember-me cookies out of the box.
+              To enable: add .rememberMe() to the formLogin() block in SecurityConfig
+              and add a RememberMeServices bean.  The parameter name must be
+              "remember-me" (Spring Security's default) unless you override it.
+              Left here as a placeholder — remove if not implementing remember-me.
+            -->
+            <div class="form-group form-check">
+                <input type="checkbox" id="remember-me" name="remember-me" class="form-check-input"/>
+                <label for="remember-me" class="form-check-label">Keep me signed in</label>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block">
+                Sign In
+            </button>
+
+        </form>
+        <!-- End of form — Thymeleaf will have injected _csrf hidden input here -->
+
+        <!-- ── Footer links ───────────────────────────────────────────── -->
+        <div class="login-footer">
+            <!--
+              /register is permitted without authentication in SecurityConfig.
+              Only show this link if customer self-registration is enabled.
+              Remove or hide behind a feature flag in staff-only deployments.
+            -->
+            <p>New customer? <a th:href="@{/register}">Create an account</a></p>
+        </div>
+
+    </div><!-- /.login-card -->
+
+</div><!-- /.login-wrapper -->
+
+<!--
+  login.js handles:
+  - Password visibility toggle
+  - Client-side validation feedback (does NOT replace server-side checks)
+  th:src resolves the context path automatically.
+  SecurityConfig permits /js/** without authentication.
+-->
+<script th:src="@{/js/login.js}"></script>
+
+</body>
+</html>

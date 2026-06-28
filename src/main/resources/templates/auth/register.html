@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — Restaurant Management System</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <link rel="stylesheet" th:href="@{/css/login.css}"/>
+</head>
+<body style="background: var(--color-bg);">
+
+<div class="login-wrapper">
+  <div class="login-card" style="max-width: 520px;">
+
+    <!-- Branding -->
+    <div class="login-header">
+      <img th:src="@{/images/logo.png}" alt="RMS Logo" class="logo"
+           onerror="this.style.display='none'"/>
+      <h1>Create Account</h1>
+      <p class="subtitle">Register to access the system</p>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:replace="~{fragments/messages :: messages}"></div>
+
+    <!-- Registration form -->
+    <form th:action="@{/register}" method="post" class="login-form" id="registerForm" novalidate>
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+      <!-- Full Name + Username -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" class="form-control"
+                 th:value="${registerRequest?.fullName}"
+                 placeholder="Jane Doe" required/>
+          <span class="form-error" id="fullName-error"
+                th:if="${#fields.hasErrors('registerRequest.fullName')}"
+                th:errors="${registerRequest.fullName}"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div style="position:relative;">
+            <input type="text" id="username" name="username" class="form-control"
+                   th:value="${registerRequest?.username}"
+                   placeholder="jdoe" required autocomplete="username"
+                   minlength="3" maxlength="30"/>
+            <span id="usernameStatus"
+                  style="position:absolute; right:10px; top:50%; transform:translateY(-50%);
+                         font-size:var(--fs-xs);"></span>
+          </div>
+          <span class="form-error" id="username-error"
+                th:if="${#fields.hasErrors('registerRequest.username')}"
+                th:errors="${registerRequest.username}"></span>
+        </div>
+      </div>
+
+      <!-- Email + Phone -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control"
+                 th:value="${registerRequest?.email}"
+                 placeholder="jane@example.com" required autocomplete="email"/>
+          <span class="form-error" id="email-error"
+                th:if="${#fields.hasErrors('registerRequest.email')}"
+                th:errors="${registerRequest.email}"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" class="form-control"
+                 th:value="${registerRequest?.phone}"
+                 placeholder="+60 12-345 6789"/>
+          <span class="form-error" id="phone-error"
+                th:if="${#fields.hasErrors('registerRequest.phone')}"
+                th:errors="${registerRequest.phone}"></span>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" name="password" class="form-control"
+                 placeholder="Min 8 characters" required
+                 autocomplete="new-password" minlength="8"/>
+          <button type="button" class="toggle-password" aria-label="Show password">👁</button>
+        </div>
+        <!-- Password strength indicator -->
+        <div class="password-strength" id="passwordStrength" style="display:none;">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+          <div class="strength-text" id="strengthText"></div>
+        </div>
+        <span class="form-error" id="password-error"
+              th:if="${#fields.hasErrors('registerRequest.password')}"
+              th:errors="${registerRequest.password}"></span>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="confirmPassword" name="confirmPassword"
+                 class="form-control" placeholder="Repeat password" required
+                 autocomplete="new-password"/>
+          <button type="button" class="toggle-password" aria-label="Show password">👁</button>
+        </div>
+        <span class="form-error" id="confirmPassword-error" style="display:none;">
+          Passwords do not match.
+        </span>
+      </div>
+
+      <!-- Default role for self-registration (non-admin users) -->
+      <sec:authorize access="!hasRole('ADMIN')">
+        <input type="hidden" name="role" value="CUSTOMER"/>
+      </sec:authorize>
+
+      <!-- Role selection — only for admins -->
+      <sec:authorize access="hasRole('ADMIN')">
+        <div class="form-group">
+          <label for="role">Assign Role</label>
+          <select id="role" name="role" class="form-control">
+            <option value="WAITER">Waiter</option>
+            <option value="CHEF">Chef</option>
+            <option value="MANAGER">Manager</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+      </sec:authorize>
+
+      <button type="submit" class="btn btn-primary btn-block" id="submitBtn"
+              style="margin-top:8px;">
+        Create Account
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>Already have an account? <a th:href="@{/login}">Sign in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<script th:src="@{/js/login.js}"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Password strength ─────────────────────────────────────────────── */
+  const pwdInput      = document.getElementById('password');
+  const strengthBox   = document.getElementById('passwordStrength');
+  const strengthFill  = document.getElementById('strengthFill');
+  const strengthText  = document.getElementById('strengthText');
+
+  const LEVELS = [
+    { label: 'Weak',   cls: 'strength-weak',   color: 'var(--color-danger)',    width: '25%' },
+    { label: 'Fair',   cls: 'strength-fair',   color: 'var(--color-warning)',   width: '50%' },
+    { label: 'Good',   cls: 'strength-good',   color: 'var(--color-secondary)', width: '75%' },
+    { label: 'Strong', cls: 'strength-strong', color: 'var(--color-success)',   width: '100%' },
+  ];
+
+  function calcStrength(pwd) {
+    let score = 0;
+    if (pwd.length >= 8)  score++;
+    if (pwd.length >= 12) score++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+    if (/\d/.test(pwd))   score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    if (score <= 1) return 0;
+    if (score === 2) return 1;
+    if (score === 3) return 2;
+    return 3;
+  }
+
+  pwdInput.addEventListener('input', function () {
+    const val = this.value;
+    if (!val) { strengthBox.style.display = 'none'; return; }
+    strengthBox.style.display = 'block';
+    const level = LEVELS[calcStrength(val)];
+    strengthBox.className = 'password-strength ' + level.cls;
+    strengthFill.style.width = level.width;
+    strengthFill.style.background = level.color;
+    strengthText.textContent = level.label;
+    strengthText.style.color = level.color;
+  });
+
+  /* ── Confirm password match ────────────────────────────────────────── */
+  const confirmInput = document.getElementById('confirmPassword');
+  const confirmError = document.getElementById('confirmPassword-error');
+
+  function checkMatch() {
+    if (confirmInput.value && confirmInput.value !== pwdInput.value) {
+      confirmError.style.display = 'block';
+      confirmInput.classList.add('is-invalid');
+      return false;
+    }
+    confirmError.style.display = 'none';
+    confirmInput.classList.remove('is-invalid');
+    return true;
+  }
+
+  confirmInput.addEventListener('input', checkMatch);
+
+  /* ── Username availability check ───────────────────────────────────── */
+  const usernameInput  = document.getElementById('username');
+  const usernameStatus = document.getElementById('usernameStatus');
+  let   usernameTimer  = null;
+
+  usernameInput.addEventListener('input', function () {
+    clearTimeout(usernameTimer);
+    const val = this.value.trim();
+    if (val.length < 3) { usernameStatus.textContent = ''; return; }
+
+    usernameStatus.textContent = '…';
+    usernameStatus.style.color = 'var(--color-text-muted)';
+
+    usernameTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/v1/users/check-username?username=' + encodeURIComponent(val));
+        const data = await res.json();
+        if (data.available) {
+          usernameStatus.textContent = '✅';
+          usernameInput.classList.remove('is-invalid');
+          usernameInput.classList.add('is-valid');
+        } else {
+          usernameStatus.textContent = '❌';
+          usernameInput.classList.add('is-invalid');
+          usernameInput.classList.remove('is-valid');
+          document.getElementById('username-error').textContent = 'Username already taken.';
+        }
+      } catch (_) {
+        usernameStatus.textContent = '';
+      }
+    }, 450);
+  });
+
+  /* ── Form submit validation ────────────────────────────────────────── */
+  document.getElementById('registerForm').addEventListener('submit', function (e) {
+    if (!checkMatch()) { e.preventDefault(); }
+  });
+
+  /* ── Toggle password visibility ────────────────────────────────────── */
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const input = this.previousElementSibling;
+      if (input.type === 'password') { input.type = 'text'; this.textContent = '🙈'; }
+      else { input.type = 'password'; this.textContent = '👁'; }
+    });
+  });
+})();
+</script>
+</body>
+</html>
