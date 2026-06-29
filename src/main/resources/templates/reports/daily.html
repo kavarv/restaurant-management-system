@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Daily Report')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'reports', 'Daily Report')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Daily Sales Report</h1>
+      <p class="page-subtitle" th:text="${#temporals.format(report.date, 'dd MMMM yyyy')}">Date</p>
+    </div>
+    <div class="action-group">
+      <a th:href="@{/reports}" class="btn btn-outline btn-sm">Back to Reports</a>
+      <a th:href="@{/reports/export(type=csv,report=daily,date=${report.date})}"
+         class="btn btn-outline btn-sm">Export CSV</a>
+      <a th:href="@{/reports/export(type=pdf,report=daily,date=${report.date})}"
+         class="btn btn-primary btn-sm">Export PDF</a>
+    </div>
+  </div>
+
+  <!-- Date picker -->
+  <div class="card" style="margin-bottom:var(--space-5);">
+    <div class="card-body" style="padding:var(--space-4);">
+      <form method="get" th:action="@{/reports/daily}" style="display:flex;gap:12px;align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Select Date</label>
+          <input type="date" name="date" class="form-control"
+                 th:value="${report.date}" style="width:180px;"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">View</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="grid grid-3" style="margin-bottom:var(--space-5);">
+    <div class="stat-card">
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-value" th:text="'RM ' + ${#numbers.formatDecimal(report.totalRevenue ?: 0, 1, 2)}">RM 0.00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Orders</div>
+      <div class="stat-value" th:text="${report.totalOrders ?: 0}">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Average Order Value</div>
+      <div class="stat-value" th:text="'RM ' + ${#numbers.formatDecimal(report.averageOrderValue ?: 0, 1, 2)}">RM 0.00</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="align-items:start;">
+
+    <!-- Top items -->
+    <div class="card">
+      <div class="card-header"><h3>Top Items Today</h3></div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Qty Sold</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="item, iStat : ${topItems}">
+              <td th:text="${iStat.count}">1</td>
+              <td th:text="${item.menuItemName}">-</td>
+              <td th:text="${item.categoryName}">-</td>
+              <td th:text="${item.totalQuantity}">0</td>
+              <td th:text="'RM ' + ${#numbers.formatDecimal(item.totalRevenue, 1, 2)}">RM 0.00</td>
+            </tr>
+            <tr th:if="${topItems == null or #lists.isEmpty(topItems)}">
+              <td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:32px;">
+                No sales data for this date.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Revenue by category -->
+    <div class="card">
+      <div class="card-header"><h3>Revenue by Category</h3></div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Orders</th>
+              <th>Revenue</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="cat : ${categories}">
+              <td th:text="${cat.categoryName}">-</td>
+              <td th:text="${cat.orderCount}">0</td>
+              <td th:text="'RM ' + ${#numbers.formatDecimal(cat.totalRevenue, 1, 2)}">RM 0.00</td>
+              <td th:text="${#numbers.formatDecimal(cat.percentageOfTotal ?: 0, 1, 1)} + '%'">0%</td>
+            </tr>
+            <tr th:if="${categories == null or #lists.isEmpty(categories)}">
+              <td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:32px;">
+                No category data.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+</div>
+</body>
+</html>

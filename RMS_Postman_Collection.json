@@ -1,0 +1,690 @@
+{
+  "info": {
+    "_postman_id": "rms-v1-collection",
+    "name": "Restaurant Management System API",
+    "description": "Complete API collection for the RMS Spring Boot application.\n\n**Setup:**\n1. Import this collection and the `RMS_Environment.json` environment.\n2. Set `{{baseUrl}}` to `http://localhost:8080`.\n3. Run the **Login** request first — the test script saves `JSESSIONID` and `csrfToken` automatically.\n4. All subsequent requests inherit those variables.\n\n**CSRF:** Every mutating request (POST/PUT/PATCH/DELETE) includes `X-CSRF-TOKEN: {{csrfToken}}`. Call `GET /api/v1/auth/csrf` to refresh if the token expires.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",    "value": "http://localhost:8080", "type": "string" },
+    { "key": "sessionId",  "value": "",                      "type": "string" },
+    { "key": "csrfToken",  "value": "",                      "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "GET CSRF Token",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": [
+              "var json = pm.response.json();",
+              "if (json.token) { pm.collectionVariables.set('csrfToken', json.token); }",
+              "pm.test('CSRF token present', () => pm.expect(json.token || json.message).to.exist);"
+            ]}
+          }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/csrf", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","csrf"] }
+          },
+          "response": [{
+            "name": "200 OK",
+            "status": "OK", "code": 200,
+            "body": "{\n  \"token\": \"abc123xyz\",\n  \"headerName\": \"X-CSRF-TOKEN\",\n  \"paramName\": \"_csrf\"\n}"
+          }]
+        },
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "prerequest",
+            "script": { "exec": [
+              "// Fetch a fresh CSRF token before logging in",
+              "pm.sendRequest({ url: pm.collectionVariables.get('baseUrl') + '/api/v1/auth/csrf', method: 'GET' },",
+              "  function(err, res) {",
+              "    var json = res.json();",
+              "    if (json.token) pm.collectionVariables.set('csrfToken', json.token);",
+              "  }",
+              ");"
+            ]}
+          },{
+            "listen": "test",
+            "script": { "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('username present', () => pm.expect(pm.response.json().username).to.exist);",
+              "// Save JSESSIONID from Set-Cookie header",
+              "var cookie = pm.response.headers.get('Set-Cookie');",
+              "if (cookie) {",
+              "  var match = cookie.match(/JSESSIONID=([^;]+)/);",
+              "  if (match) pm.collectionVariables.set('sessionId', match[1]);",
+              "}",
+              "// Also grab from cookie jar",
+              "var jsessionid = pm.cookies.get('JSESSIONID');",
+              "if (jsessionid) pm.collectionVariables.set('sessionId', jsessionid);"
+            ]}
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","login"] }
+          },
+          "response": [{
+            "name": "200 OK",
+            "status": "OK", "code": 200,
+            "body": "{\n  \"username\": \"admin\",\n  \"tokenType\": \"Session\"\n}"
+          }]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"newwaiter\",\n  \"email\": \"newwaiter@restaurant.com\",\n  \"password\": \"Waiter@456\",\n  \"role\": \"WAITER\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","register"] }
+          },
+          "response": [{
+            "name": "201 Created",
+            "status": "Created", "code": 201,
+            "body": "{\n  \"id\": 10,\n  \"username\": \"newwaiter\",\n  \"email\": \"newwaiter@restaurant.com\",\n  \"role\": \"WAITER\"\n}"
+          }]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/logout", "host": ["{{baseUrl}}"], "path": ["api","v1","auth","logout"] }
+          },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Menu",
+      "item": [
+        {
+          "name": "GET All Menu Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/menu?page=0&size=20&sort=name&available=true",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","menu"],
+              "query": [
+                { "key": "page",      "value": "0" },
+                { "key": "size",      "value": "20" },
+                { "key": "sort",      "value": "name" },
+                { "key": "available", "value": "true" },
+                { "key": "categoryId","value": "1",  "disabled": true },
+                { "key": "search",    "value": "burger", "disabled": true }
+              ]
+            }
+          },
+          "response": [{
+            "name": "200 OK",
+            "status": "OK", "code": 200,
+            "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"name\": \"Classic Beef Burger\",\n      \"price\": 12.99,\n      \"categoryId\": 1,\n      \"categoryName\": \"Burgers\",\n      \"isAvailable\": true,\n      \"isVegetarian\": false,\n      \"preparationTimeMinutes\": 15,\n      \"calories\": 650\n    }\n  ],\n  \"page\": 0,\n  \"size\": 20,\n  \"totalElements\": 1,\n  \"totalPages\": 1\n}"
+          }]
+        },
+        {
+          "name": "GET Single Menu Item",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/menu/1", "host": ["{{baseUrl}}"], "path": ["api","v1","menu","1"] }
+          },
+          "response": [{
+            "name": "200 OK", "status": "OK", "code": 200,
+            "body": "{\n  \"id\": 1,\n  \"name\": \"Classic Beef Burger\",\n  \"price\": 12.99,\n  \"categoryName\": \"Burgers\",\n  \"isAvailable\": true\n}"
+          }]
+        },
+        {
+          "name": "POST Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Spicy Chicken Burger\",\n  \"description\": \"Crispy chicken fillet with jalapeño mayo on a toasted bun\",\n  \"price\": 14.99,\n  \"categoryId\": 1,\n  \"isAvailable\": true,\n  \"isVegetarian\": false,\n  \"isVegan\": false,\n  \"isGlutenFree\": false,\n  \"preparationTimeMinutes\": 18,\n  \"calories\": 720,\n  \"imageUrl\": \"https://cdn.example.com/images/spicy-chicken.jpg\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/menu", "host": ["{{baseUrl}}"], "path": ["api","v1","menu"] }
+          },
+          "response": [{
+            "name": "201 Created", "status": "Created", "code": 201,
+            "body": "{\n  \"id\": 42,\n  \"name\": \"Spicy Chicken Burger\",\n  \"price\": 14.99,\n  \"categoryId\": 1,\n  \"categoryName\": \"Burgers\",\n  \"isAvailable\": true\n}"
+          }]
+        },
+        {
+          "name": "PUT Update Menu Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Spicy Chicken Burger\",\n  \"description\": \"Updated description — now with extra jalapeños\",\n  \"price\": 15.49,\n  \"categoryId\": 1,\n  \"isAvailable\": true,\n  \"isVegetarian\": false,\n  \"preparationTimeMinutes\": 18,\n  \"calories\": 740\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/menu/42", "host": ["{{baseUrl}}"], "path": ["api","v1","menu","42"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{ \"id\": 42, \"name\": \"Spicy Chicken Burger\", \"price\": 15.49 }" }]
+        },
+        {
+          "name": "DELETE Soft-Delete Menu Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/menu/42", "host": ["{{baseUrl}}"], "path": ["api","v1","menu","42"] }
+          },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        },
+        {
+          "name": "POST Restore Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/menu/42/restore", "host": ["{{baseUrl}}"], "path": ["api","v1","menu","42","restore"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{ \"id\": 42, \"name\": \"Spicy Chicken Burger\", \"deletedAt\": null }" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "GET All Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/categories", "host": ["{{baseUrl}}"], "path": ["api","v1","categories"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"id\":1,\"name\":\"Burgers\"},{\"id\":2,\"name\":\"Drinks\"}]" }]
+        },
+        {
+          "name": "GET Single Category",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/categories/1", "host": ["{{baseUrl}}"], "path": ["api","v1","categories","1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":1,\"name\":\"Burgers\",\"description\":\"All beef and chicken burgers\"}" }]
+        },
+        {
+          "name": "POST Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Desserts\",\n  \"description\": \"Cakes, ice cream and pastries\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/categories", "host": ["{{baseUrl}}"], "path": ["api","v1","categories"] }
+          },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\"id\":5,\"name\":\"Desserts\"}" }]
+        },
+        {
+          "name": "PUT Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Desserts & Sweets\",\n  \"description\": \"Cakes, ice cream, pastries and more\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/categories/5", "host": ["{{baseUrl}}"], "path": ["api","v1","categories","5"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":5,\"name\":\"Desserts & Sweets\"}" }]
+        },
+        {
+          "name": "DELETE Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/categories/5", "host": ["{{baseUrl}}"], "path": ["api","v1","categories","5"] }
+          },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "POST Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"tableId\": 3,\n  \"orderType\": \"DINE_IN\",\n  \"notes\": \"No onions on item 1 please\",\n  \"items\": [\n    {\n      \"menuItemId\": 1,\n      \"quantity\": 2,\n      \"specialNotes\": \"Well done\"\n    },\n    {\n      \"menuItemId\": 4,\n      \"quantity\": 1,\n      \"specialNotes\": null\n    }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/orders", "host": ["{{baseUrl}}"], "path": ["api","v1","orders"] }
+          },
+          "response": [{
+            "name": "201 Created", "status": "Created", "code": 201,
+            "body": "{\n  \"id\": 100,\n  \"status\": \"PENDING\",\n  \"orderType\": \"DINE_IN\",\n  \"tableNumber\": 3,\n  \"waiterName\": \"admin\",\n  \"totalAmount\": 42.90,\n  \"items\": [\n    { \"menuItemId\": 1, \"menuItemName\": \"Classic Beef Burger\", \"quantity\": 2, \"unitPrice\": 12.99 },\n    { \"menuItemId\": 4, \"menuItemName\": \"Fries\", \"quantity\": 1, \"unitPrice\": 4.99 }\n  ]\n}"
+          }]
+        },
+        {
+          "name": "GET Orders (filtered)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders?page=0&size=20&status=PENDING",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","orders"],
+              "query": [
+                { "key": "page",     "value": "0" },
+                { "key": "size",     "value": "20" },
+                { "key": "status",   "value": "PENDING" },
+                { "key": "from",     "value": "2025-01-01", "disabled": true },
+                { "key": "to",       "value": "2025-12-31", "disabled": true },
+                { "key": "tableId",  "value": "3",          "disabled": true },
+                { "key": "waiterId", "value": "1",          "disabled": true }
+              ]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"content\":[{\"id\":100,\"status\":\"PENDING\"}],\"totalElements\":1,\"totalPages\":1}" }]
+        },
+        {
+          "name": "GET Single Order",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/orders/100", "host": ["{{baseUrl}}"], "path": ["api","v1","orders","100"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":100,\"status\":\"PENDING\",\"totalAmount\":42.90}" }]
+        },
+        {
+          "name": "PATCH Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\",\n  \"reason\": null\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/orders/100/status", "host": ["{{baseUrl}}"], "path": ["api","v1","orders","100","status"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":100,\"status\":\"CONFIRMED\"}" }]
+        },
+        {
+          "name": "DELETE Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/100?reason=Customer+cancelled",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","orders","100"],
+              "query": [{ "key": "reason", "value": "Customer cancelled" }]
+            }
+          },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "GET All Inventory Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/inventory", "host": ["{{baseUrl}}"], "path": ["api","v1","inventory"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"id\":1,\"name\":\"Beef Patty\",\"unit\":\"kg\",\"currentStock\":100.000,\"minimumStock\":10.000,\"lowStock\":false}]" }]
+        },
+        {
+          "name": "GET Low-Stock Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/inventory/low-stock", "host": ["{{baseUrl}}"], "path": ["api","v1","inventory","low-stock"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"id\":3,\"name\":\"Olive Oil\",\"currentStock\":2.000,\"minimumStock\":5.000,\"lowStock\":true}]" }]
+        },
+        {
+          "name": "GET Single Inventory Item",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/inventory/1", "host": ["{{baseUrl}}"], "path": ["api","v1","inventory","1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":1,\"name\":\"Beef Patty\",\"currentStock\":100.000}" }]
+        },
+        {
+          "name": "POST Create Inventory Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cheddar Cheese\",\n  \"unit\": \"kg\",\n  \"currentStock\": 20.000,\n  \"minimumStock\": 3.000,\n  \"costPerUnit\": 8.50,\n  \"supplierName\": \"Dairy Fresh Ltd\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/inventory", "host": ["{{baseUrl}}"], "path": ["api","v1","inventory"] }
+          },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\"id\":7,\"name\":\"Cheddar Cheese\",\"currentStock\":20.000}" }]
+        },
+        {
+          "name": "PUT Update Inventory Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cheddar Cheese\",\n  \"unit\": \"kg\",\n  \"currentStock\": 20.000,\n  \"minimumStock\": 5.000,\n  \"costPerUnit\": 9.00,\n  \"supplierName\": \"Premium Dairy Ltd\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/inventory/7", "host": ["{{baseUrl}}"], "path": ["api","v1","inventory","7"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":7,\"name\":\"Cheddar Cheese\",\"minimumStock\":5.000}" }]
+        },
+        {
+          "name": "POST Adjust Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 15.000,\n  \"reason\": \"Weekly delivery from Dairy Fresh Ltd\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/inventory/7/adjust", "host": ["{{baseUrl}}"], "path": ["api","v1","inventory","7","adjust"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":7,\"name\":\"Cheddar Cheese\",\"currentStock\":35.000}" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "POST Create Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"guestName\": \"John Smith\",\n  \"guestPhone\": \"+1-555-0101\",\n  \"guestEmail\": \"john.smith@email.com\",\n  \"partySize\": 4,\n  \"reservationDate\": \"2025-12-25\",\n  \"reservationTime\": \"19:00\",\n  \"tableId\": 5,\n  \"specialRequests\": \"Window table preferred, birthday celebration\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/reservations", "host": ["{{baseUrl}}"], "path": ["api","v1","reservations"] }
+          },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\"id\":15,\"guestName\":\"John Smith\",\"status\":\"PENDING\",\"reservationDate\":\"2025-12-25\"}" }]
+        },
+        {
+          "name": "GET All Reservations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reservations?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","reservations"],
+              "query": [
+                { "key": "page",   "value": "0" },
+                { "key": "size",   "value": "20" },
+                { "key": "date",   "value": "2025-12-25", "disabled": true },
+                { "key": "status", "value": "PENDING",    "disabled": true }
+              ]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"content\":[{\"id\":15,\"guestName\":\"John Smith\",\"status\":\"PENDING\"}],\"totalElements\":1}" }]
+        },
+        {
+          "name": "GET Single Reservation",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/reservations/15", "host": ["{{baseUrl}}"], "path": ["api","v1","reservations","15"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":15,\"guestName\":\"John Smith\",\"status\":\"PENDING\",\"partySize\":4}" }]
+        },
+        {
+          "name": "PATCH Confirm Reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/reservations/15/confirm", "host": ["{{baseUrl}}"], "path": ["api","v1","reservations","15","confirm"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":15,\"status\":\"CONFIRMED\"}" }]
+        },
+        {
+          "name": "PATCH Cancel Reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/reservations/15/cancel", "host": ["{{baseUrl}}"], "path": ["api","v1","reservations","15","cancel"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":15,\"status\":\"CANCELLED\"}" }]
+        },
+        {
+          "name": "DELETE Reservation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/reservations/15", "host": ["{{baseUrl}}"], "path": ["api","v1","reservations","15"] }
+          },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "POST Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"orderId\": 100,\n  \"paymentMethod\": \"CASH\",\n  \"amountPaid\": 50.00\n}" },
+            "url": { "raw": "{{baseUrl}}/api/v1/payments", "host": ["{{baseUrl}}"], "path": ["api","v1","payments"] }
+          },
+          "response": [{
+            "name": "201 Created", "status": "Created", "code": 201,
+            "body": "{\n  \"id\": 55,\n  \"orderId\": 100,\n  \"paymentMethod\": \"CASH\",\n  \"amountPaid\": 50.00,\n  \"change\": 7.10,\n  \"status\": \"PAID\"\n}"
+          }]
+        },
+        {
+          "name": "GET Payment by Order",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/payments/100", "host": ["{{baseUrl}}"], "path": ["api","v1","payments","100"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":55,\"orderId\":100,\"status\":\"PAID\"}" }]
+        },
+        {
+          "name": "POST Refund Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Cookie",        "value": "JSESSIONID={{sessionId}}" },
+              { "key": "X-CSRF-TOKEN", "value": "{{csrfToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/payments/55/refund", "host": ["{{baseUrl}}"], "path": ["api","v1","payments","55","refund"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"id\":55,\"status\":\"REFUNDED\"}" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "GET Daily Sales Report",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/daily?date=2025-06-15",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","reports","daily"],
+              "query": [{ "key": "date", "value": "2025-06-15" }]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"date\":\"2025-06-15\",\"totalRevenue\":1250.80,\"totalOrders\":48,\"averageOrderValue\":26.06,\"byCategory\":[{\"categoryName\":\"Burgers\",\"revenue\":680.00},{\"categoryName\":\"Drinks\",\"revenue\":220.80}]}" }]
+        },
+        {
+          "name": "GET Revenue by Category",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/category-revenue?startDate=2025-06-01&endDate=2025-06-30",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","reports","category-revenue"],
+              "query": [
+                { "key": "startDate", "value": "2025-06-01" },
+                { "key": "endDate",   "value": "2025-06-30" }
+              ]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"categoryName\":\"Burgers\",\"totalRevenue\":8500.00,\"percentageOfTotal\":68.0},{\"categoryName\":\"Drinks\",\"totalRevenue\":4000.00,\"percentageOfTotal\":32.0}]" }]
+        },
+        {
+          "name": "GET Top Menu Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/top-items?startDate=2025-06-01&endDate=2025-06-30&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","reports","top-items"],
+              "query": [
+                { "key": "startDate", "value": "2025-06-01" },
+                { "key": "endDate",   "value": "2025-06-30" },
+                { "key": "limit",     "value": "10" }
+              ]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"menuItemName\":\"Classic Beef Burger\",\"totalSold\":320,\"totalRevenue\":4156.80}]" }]
+        },
+        {
+          "name": "GET Export CSV",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/export/csv?startDate=2025-06-01&endDate=2025-06-30",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","reports","export","csv"],
+              "query": [
+                { "key": "startDate", "value": "2025-06-01" },
+                { "key": "endDate",   "value": "2025-06-30" }
+              ]
+            }
+          },
+          "response": [{ "name": "200 OK — CSV file download", "status": "OK", "code": 200, "body": "date,totalRevenue,orderCount\n2025-06-01,350.00,14\n2025-06-02,420.50,17" }]
+        },
+        {
+          "name": "GET Export PDF",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/export/pdf?startDate=2025-06-01&endDate=2025-06-30",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","reports","export","pdf"],
+              "query": [
+                { "key": "startDate", "value": "2025-06-01" },
+                { "key": "endDate",   "value": "2025-06-30" }
+              ]
+            }
+          },
+          "response": [{ "name": "200 OK — PDF binary download", "status": "OK", "code": 200, "body": "(binary PDF content)" }]
+        }
+      ]
+    },
+
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users?page=0&size=20",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","admin","users"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "20" }]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\"content\":[{\"id\":1,\"username\":\"admin\",\"role\":\"ADMIN\"}],\"totalElements\":4}" }]
+        },
+        {
+          "name": "GET Audit Log",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/audit?page=0&size=50",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","admin","audit"],
+              "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "50" }]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"id\":1,\"entityType\":\"MenuItem\",\"entityId\":42,\"action\":\"CREATE\",\"performedBy\":\"admin\",\"timestamp\":\"2025-06-15T10:30:00\"}]" }]
+        },
+        {
+          "name": "GET Audit Log by Entity",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "JSESSIONID={{sessionId}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/audit/MenuItem/42",
+              "host": ["{{baseUrl}}"], "path": ["api","v1","admin","audit","MenuItem","42"]
+            }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\"action\":\"CREATE\",\"timestamp\":\"2025-06-15T10:30:00\"},{\"action\":\"UPDATE\",\"timestamp\":\"2025-06-16T09:00:00\"}]" }]
+        }
+      ]
+    }
+
+  ]
+}

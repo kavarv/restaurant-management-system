@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Reports')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'reports', 'Reports')}">
+<main>
+
+  <div class="page-header">
+    <h1 class="page-title">Reports</h1>
+  </div>
+
+  <!-- Report controls -->
+  <div class="card" style="margin-bottom:var(--space-5);">
+    <div class="card-body" style="padding:var(--space-4);">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;min-width:180px;">
+          <label>Report Type</label>
+          <select id="reportType" class="form-control">
+            <option value="DAILY_SALES">Daily Sales</option>
+            <option value="WEEKLY_SALES">Weekly Sales</option>
+            <option value="CATEGORY_REVENUE">Category Revenue</option>
+            <option value="TOP_ITEMS">Top Menu Items</option>
+            <option value="LOW_STOCK">Low Stock</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:140px;" id="dateFromGroup">
+          <label>Date From</label>
+          <input type="date" id="dateFrom" class="form-control"/>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:140px;" id="dateToGroup">
+          <label>Date To</label>
+          <input type="date" id="dateTo" class="form-control"/>
+        </div>
+        <button class="btn btn-primary" onclick="generateReport()">Generate</button>
+        <div id="reportExportBtns" style="display:none;margin-left:auto;display:flex;gap:8px;">
+          <a id="exportCsvBtn" href="#" class="btn btn-outline btn-sm">Export CSV</a>
+          <a id="exportPdfBtn" href="#" class="btn btn-outline btn-sm">Export PDF</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart area -->
+  <div class="card" id="chartCard" style="display:none;margin-bottom:var(--space-5);">
+    <div class="card-header">
+      <h3 id="chartTitle">Chart</h3>
+    </div>
+    <div class="card-body">
+      <div class="chart-container" style="height:280px;">
+        <canvas id="reportChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results table -->
+  <div class="card" id="resultsCard" style="display:none;">
+    <div class="card-header">
+      <h3 id="resultsTitle">Results</h3>
+      <div id="loadingSpinner" class="loading-spinner" style="display:none;"></div>
+    </div>
+    <div class="table-responsive" id="resultsTable">
+      <!-- Loaded by JS -->
+    </div>
+  </div>
+
+  <div id="noDataMsg" class="empty-state" style="display:none;">
+    <div class="empty-state-icon">&#128202;</div>
+    <h3>No data</h3>
+    <p>Try a different date range.</p>
+  </div>
+
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  var currentChart = null;
+  var csrf = document.querySelector('meta[name="_csrf"]') ? document.querySelector('meta[name="_csrf"]').content : '';
+  var csrfHeader = document.querySelector('meta[name="_csrf_header"]') ? document.querySelector('meta[name="_csrf_header"]').content : 'X-CSRF-TOKEN';
+
+  // Set default dates
+  var today = new Date();
+  var weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+  document.getElementById('dateFrom').value = weekAgo.toISOString().split('T')[0];
+
+  function generateReport() {
+    var type = document.getElementById('reportType').value;
+    var from = document.getElementById('dateFrom').value;
+    var to   = document.getElementById('dateTo').value;
+
+    document.getElementById('resultsCard').style.display = 'block';
+    document.getElementById('noDataMsg').style.display = 'none';
+    document.getElementById('loadingSpinner').style.display = 'block';
+    document.getElementById('resultsTable').innerHTML = '';
+    if (currentChart) { currentChart.destroy(); currentChart = null; }
+    document.getElementById('chartCard').style.display = 'none';
+
+    var url = '/api/v1/reports?type=' + type + '&from=' + from + '&to=' + to;
+    fetch(url, { headers: { [csrfHeader]: csrf } })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Failed');
+        return r.json();
+      })
+      .then(function(data) {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        if (!data || data.length === 0) {
+          document.getElementById('resultsCard').style.display = 'none';
+          document.getElementById('noDataMsg').style.display = 'block';
+          return;
+        }
+        renderTable(type, data);
+        renderChart(type, data);
+        var base = '/reports/export?type=' + type + '&from=' + from + '&to=' + to;
+        document.getElementById('exportCsvBtn').href = base + '&format=csv';
+        document.getElementById('exportPdfBtn').href = base + '&format=pdf';
+        document.getElementById('reportExportBtns').style.display = 'flex';
+      })
+      .catch(function() {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('resultsTable').innerHTML =
+          '<div class="alert alert-danger" style="margin:16px;">Failed to load report.</div>';
+      });
+  }
+  window.generateReport = generateReport;
+
+  function renderTable(type, data) {
+    if (!data.length) return;
+    var keys = Object.keys(data[0]);
+    var html = '<table class="table"><thead><tr>';
+    keys.forEach(function(k) {
+      html += '<th class="sortable">' + k.replace(/([A-Z])/g,' $1').trim() + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    data.forEach(function(row) {
+      html += '<tr>';
+      keys.forEach(function(k) { html += '<td>' + (row[k] !== null && row[k] !== undefined ? row[k] : '-') + '</td>'; });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('resultsTable').innerHTML = html;
+    document.getElementById('resultsTitle').textContent = 'Results (' + data.length + ' rows)';
+  }
+
+  function renderChart(type, data) {
+    var ctx = document.getElementById('reportChart').getContext('2d');
+    document.getElementById('chartCard').style.display = 'block';
+    var config;
+    if (type === 'DAILY_SALES' || type === 'WEEKLY_SALES') {
+      document.getElementById('chartTitle').textContent = type === 'DAILY_SALES' ? 'Daily Revenue' : 'Weekly Revenue';
+      config = {
+        type: 'line',
+        data: {
+          labels: data.map(function(r) { return r.date || r.week || r.label || '-'; }),
+          datasets: [{ label:'Revenue (RM)',
+            data: data.map(function(r) { return r.totalRevenue || r.revenue || 0; }),
+            borderColor:'#6B1D2A', backgroundColor:'rgba(107,29,42,.1)',
+            tension:.3, fill:true }]
+        },
+        options: { responsive:true, maintainAspectRatio:false,
+          scales:{ y:{ beginAtZero:true, ticks:{ callback: function(v){ return 'RM '+v; } } } } }
+      };
+    } else if (type === 'CATEGORY_REVENUE') {
+      document.getElementById('chartTitle').textContent = 'Revenue by Category';
+      config = {
+        type: 'bar',
+        data: {
+          labels: data.map(function(r) { return r.categoryName || r.category || '-'; }),
+          datasets: [{ label:'Revenue (RM)',
+            data: data.map(function(r) { return r.totalRevenue || r.revenue || 0; }),
+            backgroundColor:'#C8963E' }]
+        },
+        options: { responsive:true, maintainAspectRatio:false,
+          scales:{ y:{ beginAtZero:true, ticks:{ callback: function(v){ return 'RM '+v; } } } } }
+      };
+    } else if (type === 'TOP_ITEMS') {
+      document.getElementById('chartTitle').textContent = 'Top Menu Items';
+      config = {
+        type: 'bar',
+        data: {
+          labels: data.map(function(r) { return r.itemName || r.menuItemName || '-'; }),
+          datasets: [{ label:'Qty Sold',
+            data: data.map(function(r) { return r.totalQuantity || r.count || 0; }),
+            backgroundColor:'#6B1D2A' }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive:true, maintainAspectRatio:false
+        }
+      };
+    } else {
+      document.getElementById('chartCard').style.display = 'none';
+      return;
+    }
+    currentChart = new Chart(ctx, config);
+  }
+})();
+</script>
+</body>
+</html>

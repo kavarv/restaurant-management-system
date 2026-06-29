@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head('Category Revenue')}"></head>
+
+<body>
+<div th:replace="~{fragments/layout :: layout(~{::main}, 'reports', 'Category Revenue')}">
+<main>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Category Revenue Report</h1>
+      <p class="page-subtitle"
+         th:text="${#temporals.format(from, 'dd MMM yyyy')} + ' — ' + ${#temporals.format(to, 'dd MMM yyyy')}">
+        Date range
+      </p>
+    </div>
+    <div class="action-group">
+      <a th:href="@{/reports}" class="btn btn-outline btn-sm">Back to Reports</a>
+      <a th:href="@{/reports/export(type=csv,report=category,from=${from},to=${to})}"
+         class="btn btn-outline btn-sm">Export CSV</a>
+    </div>
+  </div>
+
+  <!-- Date range picker -->
+  <div class="card" style="margin-bottom:var(--space-5);">
+    <div class="card-body" style="padding:var(--space-4);">
+      <form method="get" th:action="@{/reports/category}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>From</label>
+          <input type="date" name="from" class="form-control"
+                 th:value="${from}" style="width:160px;"/>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>To</label>
+          <input type="date" name="to" class="form-control"
+                 th:value="${to}" style="width:160px;"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">View</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Revenue Breakdown by Category</h3></div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Orders</th>
+            <th>Revenue</th>
+            <th>% of Total</th>
+            <th>Revenue Bar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="cat : ${categories}">
+            <td><strong th:text="${cat.categoryName}">-</strong></td>
+            <td th:text="${cat.orderCount}">0</td>
+            <td th:text="'RM ' + ${#numbers.formatDecimal(cat.totalRevenue, 1, 2)}">RM 0.00</td>
+            <td th:text="${#numbers.formatDecimal(cat.percentageOfTotal ?: 0, 1, 1)} + '%'">0%</td>
+            <td style="width:200px;">
+              <div class="progress">
+                <div class="progress-bar"
+                     th:style="'width:' + ${#numbers.formatDecimal(cat.percentageOfTotal ?: 0, 0, 0)} + '%'"></div>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${categories == null or #lists.isEmpty(categories)}">
+            <td colspan="5" style="text-align:center;color:var(--color-text-muted);padding:48px;">
+              No sales data for the selected period.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>
