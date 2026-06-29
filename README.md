@@ -1,11 +1,12 @@
 # Restaurant Management System
 
-A full-stack restaurant operations platform built with **Spring Boot 3.2** and **Java 17**. It handles the complete restaurant workflow: menu management, real-time order processing, kitchen display, inventory tracking, table reservations, billing, and management reporting — all from a single deployable JAR.
+A full-stack restaurant operations platform built with **Spring Boot 3.2** and **Java 17**. It handles the complete restaurant workflow: menu management, real-time order processing, kitchen display, inventory tracking, table reservations, billing, management reporting, and a customer-facing self-service panel — all from a single deployable JAR.
 
 ---
 
 ## Features
 
+- **Customer Panel** — self-service portal for customers: browse the menu, make table reservations, and track their bookings after registering an account
 - **Menu Management** — full CRUD for menu items and categories; soft-delete with restore; dietary flags (vegetarian, vegan, gluten-free); image URLs; preparation time and calorie tracking
 - **Order Lifecycle** — state-machine transitions: PENDING → CONFIRMED → PREPARING → READY → SERVED → COMPLETED; automatic inventory deduction on create; inventory restore on cancel
 - **Real-Time Kitchen Display (KDS)** — STOMP/WebSocket feed broadcasts new orders and status changes to the kitchen screen without polling
@@ -15,7 +16,7 @@ A full-stack restaurant operations platform built with **Spring Boot 3.2** and *
 - **Payments & Billing** — cash, card, and UPI payment methods; PDF receipt generation; refund support
 - **Reports** — daily and weekly sales reports; revenue by category; top-selling items; CSV and PDF export
 - **Audit Log** — every create/update/delete records the acting user, timestamp, and before/after snapshot
-- **Role-Based Access Control** — four roles: ADMIN, MANAGER, WAITER, CHEF; enforced at both HTTP and method level via `@PreAuthorize`
+- **Role-Based Access Control** — five roles: ADMIN, MANAGER, WAITER, CHEF, CUSTOMER; enforced at both HTTP and method level via `@PreAuthorize`
 - **API Documentation** — interactive Swagger UI at `/swagger-ui.html`; full OpenAPI 3 spec at `/api-docs`
 
 ---
@@ -54,7 +55,7 @@ A full-stack restaurant operations platform built with **Spring Boot 3.2** and *
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/restaurant-management-system.git
+git clone https://github.com/kavarv/restaurant-management-system.git
 cd restaurant-management-system
 ```
 
@@ -91,20 +92,40 @@ The application starts on **http://localhost:8080**. The first run populates def
 
 | URL | Description |
 |---|---|
-| http://localhost:8080 | Main application (redirects to login) |
+| http://localhost:8080 | Landing page (public) |
 | http://localhost:8080/login | Login page |
+| http://localhost:8080/register | Customer self-registration |
+| http://localhost:8080/customer/dashboard | Customer panel (requires CUSTOMER role) |
 | http://localhost:8080/swagger-ui.html | Swagger UI (interactive API docs) |
 | http://localhost:8080/api-docs | Raw OpenAPI 3 JSON |
 | http://localhost:8080/actuator/health | Health check |
 
 ### 6. Default credentials
 
-| Role | Username | Password |
-|---|---|---|
-| Admin | `admin` | `Admin@123` |
-| Manager | `manager` | `Manager@123` |
-| Waiter | `waiter` | `Waiter@123` |
-| Chef | `chef` | `Chef@123` |
+The following accounts are seeded automatically on first startup:
+
+| Role | Username | Password | Access |
+|---|---|---|---|
+| Admin | `admin` | `Admin@123` | Full system access |
+| Manager | `manager1` | `Manager@123` | Orders, inventory, reports |
+| Waiter | `waiter1` | `Waiter@123` | Orders, tables |
+| Waiter | `waiter2` | `Waiter@123` | Orders, tables |
+| Chef | `chef1` | `Chef@123` | Kitchen display |
+
+> **Customer accounts** are not seeded. Customers self-register at `/register` — a new account is automatically assigned the `CUSTOMER` role and gains access to the customer panel at `/customer/dashboard`.
+
+---
+
+## Customer Panel
+
+Customers register at `/register` and are automatically assigned the `CUSTOMER` role. After login they can:
+
+| URL | Description |
+|---|---|
+| `/customer/dashboard` | Personal dashboard with booking overview |
+| `/customer/menu` | Browse the full menu with dietary filters |
+| `/customer/reserve` | Make a new table reservation |
+| `/customer/reservations` | View and manage their own reservations |
 
 ---
 
@@ -125,7 +146,7 @@ mvn test -Dtest=MenuItemServiceTest
 mvn test -Dtest=OrderIntegrationTest -DfailIfNoTests=false
 ```
 
-Integration tests under `src/test/java/.../integration/` are annotated `@Disabled` and require either a running MySQL instance with the `test` profile, or a Testcontainers setup. Remove `@Disabled` to run them locally.
+Integration tests under `src/test/java/.../integration/` are annotated `@Disabled` and require a running MySQL instance with the `test` profile. Remove `@Disabled` to run them locally.
 
 ---
 
@@ -170,6 +191,7 @@ src/
 │   │   ├── config/          # SecurityConfig, WebSocketConfig, OpenApiConfig, DataInitializer
 │   │   ├── controller/
 │   │   │   ├── api/         # REST controllers (MenuItemApiController, OrderApiController, ...)
+│   │   │   ├── CustomerController.java   # Customer panel (CUSTOMER role)
 │   │   │   └── *.java       # Thymeleaf MVC controllers (views)
 │   │   ├── dto/
 │   │   │   ├── request/     # Incoming payloads with Bean Validation annotations
@@ -185,7 +207,9 @@ src/
 │   │   └── websocket/       # WebSocketEventPublisher, STOMP message types
 │   └── resources/
 │       ├── static/          # CSS, JS, images
-│       ├── templates/       # Thymeleaf HTML templates
+│       ├── templates/
+│       │   ├── customer/    # Customer panel pages (dashboard, menu, reserve, reservations)
+│       │   └── ...          # Admin, manager, waiter, chef templates
 │       ├── application.properties
 │       └── schema.sql       # DDL (IF NOT EXISTS — safe to run on every startup)
 └── test/
@@ -202,18 +226,17 @@ src/
 
 ## Screenshots
 
-> Add screenshots below after capturing them from the running application.
-
 | Screen | File |
 |---|---|
 | Login page | `docs/screenshots/01-login.png` |
 | Dashboard | `docs/screenshots/02-dashboard.png` |
-| Order management | `docs/screenshots/03-orders.png` |
-| Kitchen Display (KDS) | `docs/screenshots/04-kds.png` |
-| Floor plan (table view) | `docs/screenshots/05-floor-plan.png` |
-| Inventory management | `docs/screenshots/06-inventory.png` |
-| Reports & analytics | `docs/screenshots/07-reports.png` |
-| Billing / payment | `docs/screenshots/08-billing.png` |
+| Customer panel | `docs/screenshots/03-customer.png` |
+| Order management | `docs/screenshots/04-orders.png` |
+| Kitchen Display (KDS) | `docs/screenshots/05-kds.png` |
+| Floor plan (table view) | `docs/screenshots/06-floor-plan.png` |
+| Inventory management | `docs/screenshots/07-inventory.png` |
+| Reports & analytics | `docs/screenshots/08-reports.png` |
+| Billing / payment | `docs/screenshots/09-billing.png` |
 
 ---
 
@@ -234,29 +257,18 @@ Key relationships:
 
 ## Key Design Decisions
 
-- **Session/cookie auth instead of JWT** — the application is server-rendered with Thymeleaf; a session cookie is simpler to manage, avoids token refresh complexity, and integrates natively with Spring Security's CSRF protection. JWT would add value only for a stateless SPA or mobile client.
+- **Session/cookie auth instead of JWT** — the application is server-rendered with Thymeleaf; a session cookie is simpler to manage, avoids token refresh complexity, and integrates natively with Spring Security's CSRF protection.
 
-- **Soft-delete instead of hard-delete for menu items** — deleting a menu item that appears in historical orders would orphan `order_items` or require cascade-deleting order history. Soft-delete (`deleted_at` timestamp + `@SQLRestriction`) hides items from the menu while preserving referential integrity and audit history.
+- **Customer self-registration** — customers register via `/register` and are automatically assigned the `CUSTOMER` role. This keeps staff accounts admin-controlled while allowing public sign-ups.
 
-- **Thymeleaf instead of React/Vue** — the team is Java-focused; server-side rendering eliminates a separate frontend build pipeline, simplifies CSRF handling, and makes the `sec:authorize` tag available for role-based UI rendering without duplicating authorization logic in JavaScript.
+- **Soft-delete instead of hard-delete for menu items** — deleting a menu item that appears in historical orders would orphan `order_items`. Soft-delete (`deleted_at` timestamp + `@SQLRestriction`) hides items from the menu while preserving referential integrity and audit history.
 
-- **Inventory deduction at order creation** — deducting stock when the order is placed (not when it's served) provides immediate feedback if stock is insufficient, prevents over-selling, and keeps the kitchen's ingredient consumption accurate for the day's starting stock.
+- **Inventory deduction at order creation** — deducting stock when the order is placed (not when it's served) provides immediate feedback if stock is insufficient and prevents over-selling.
 
-- **State-machine validation in the service layer** — order status transitions (e.g. PENDING → CONFIRMED, CONFIRMED → PREPARING) are enforced by a `switch` expression in `OrderServiceImpl.validateTransition()`. This keeps the rules in one auditable place, independent of which role or controller initiates the change.
-
----
-
-## Known Limitations / Future Improvements
-
-- **No email notifications** — reservations and order confirmations do not currently trigger email. Adding Spring Mail + an async `@EventListener` would cover this.
-- **No Testcontainers setup** — integration tests are `@Disabled` pending a Testcontainers MySQL configuration. This would allow CI to run the full test suite without a pre-configured database.
-- **Single-restaurant scope** — the schema assumes one restaurant instance. A `tenant_id` column on all tables would enable multi-tenant SaaS.
-- **Inventory threshold alerts are pull-based** — low-stock is checked on request. A scheduled `@Scheduled` job could push alerts to a notification queue.
-- **No pagination on inventory list** — `GET /api/v1/inventory` returns all items. For large inventories (500+ items) this should be paginated.
-- **Report queries load all orders in memory** — `OrderServiceImpl.findAll()` fetches all orders then filters in Java. This should be replaced with a JPA `Specification` or native query for large datasets.
+- **State-machine validation in the service layer** — order status transitions (e.g. PENDING → CONFIRMED → PREPARING) are enforced by a `switch` expression in `OrderServiceImpl.validateTransition()`, keeping the rules in one auditable place.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
+This project is licensed under the **MIT License**.
