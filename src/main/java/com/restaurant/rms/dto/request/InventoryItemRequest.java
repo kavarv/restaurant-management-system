@@ -29,5 +29,4 @@ public class InventoryItemRequest {
     private BigDecimal costPerUnit;
 
     @Size(max = 200)
-    private String supplierName;
-}
+    

@@ -9,5 +9,4 @@ public enum Role {
     MANAGER,
     WAITER,
     CHEF,
-    CUSTOMER
-}
+    

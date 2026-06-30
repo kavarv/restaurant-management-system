@@ -111,7 +111,4 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     private InventoryItem getItemOrThrow(Long id) {
-        return inventoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("InventoryItem", "id", id));
-    }
-}
+        return inventoryRepository.fi

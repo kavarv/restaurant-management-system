@@ -36,6 +36,4 @@ public class CustomerController {
 
     @GetMapping("/reservations")
     public String reservations() {
-        return "customer/reservations";
-    }
-}
+        re

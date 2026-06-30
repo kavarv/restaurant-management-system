@@ -68,5 +68,4 @@ public class User extends BaseEntity {
      * history is loaded only in the reservation management context.
      */
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private java.util.List<Reservation> reservations = new java.util.ArrayList<>();
-}
+    private java

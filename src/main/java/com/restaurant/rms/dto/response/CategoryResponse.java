@@ -22,6 +22,4 @@ public class CategoryResponse {
                 .displayOrder(c.getDisplayOrder())
                 .isActive(c.getIsActive())
                 .createdAt(c.getCreatedAt())
-                .build();
-    }
-}
+          

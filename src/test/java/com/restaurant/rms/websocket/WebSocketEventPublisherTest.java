@@ -177,8 +177,4 @@ class WebSocketEventPublisherTest {
         publisher.publishNewOrder(order);
 
         verify(messagingTemplate).convertAndSend(
-                eq("/topic/kitchen"),
-                (Object) argThat(payload -> payload instanceof KitchenDisplayMessage kdm
-                        && kdm.getTableNumber() == null));
-    }
-}
+               

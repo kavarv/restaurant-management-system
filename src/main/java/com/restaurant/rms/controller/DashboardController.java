@@ -24,6 +24,4 @@ public class DashboardController {
         boolean hasRole = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_CHEF"));
         if (hasRole) return "redirect:/kitchen";
-        return "dashboard/index";
-    }
-}
+        return "

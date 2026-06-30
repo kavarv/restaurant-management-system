@@ -28,6 +28,4 @@ public class KitchenController {
                 PageRequest.of(0, 50), OrderStatus.PREPARING, null, null, null, null).getContent());
         model.addAttribute("readyOrders", orderService.findAll(
                 PageRequest.of(0, 50), OrderStatus.READY, null, null, null, null).getContent());
-        return "dashboard/chef";
-    }
-}
+        ret

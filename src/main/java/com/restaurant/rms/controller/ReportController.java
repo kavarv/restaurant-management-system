@@ -193,9 +193,4 @@ public class ReportController {
                         response.getOutputStream());
             }
             default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    "Unknown PDF report type: " + report);
-        }
-        response.getOutputStream().flush();
-        log.info("PDF export: report={} date={} from={} to={}", report, date, from, to);
-    }
-}
+               

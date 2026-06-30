@@ -16,6 +16,4 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class RmsApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(RmsApplication.class, args);
-    }
-}
+        SpringApplication.run(RmsApplication.clas

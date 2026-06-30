@@ -13,5 +13,4 @@ public class OrderStatusUpdateRequest {
     @NotNull(message = "Status is required")
     private OrderStatus status;
 
-    private String reason;
-}
+    private St

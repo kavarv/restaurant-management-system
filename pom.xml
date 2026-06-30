@@ -303,15 +303,4 @@
                                 <exclude>com/restaurant/rms/dto/**</exclude>
                                 <exclude>com/restaurant/rms/entity/**</exclude>
                                 <exclude>com/restaurant/rms/exception/**</exclude>
-                                <exclude>com/restaurant/rms/security/UserPrincipal.class</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-
-                </executions>
-            </plugin>
-
-        </plugins>
-    </build>
-
-</project>
+      

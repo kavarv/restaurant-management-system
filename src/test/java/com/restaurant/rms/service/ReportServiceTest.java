@@ -106,7 +106,4 @@ class ReportServiceTest {
         assertThat(burgersDTO.getPercentageOfTotal()).isCloseTo(75.0, within(0.01));
 
         CategoryRevenueDTO drinksDTO = result.stream()
-                .filter(d -> "Drinks".equals(d.getCategoryName())).findFirst().orElseThrow();
-        assertThat(drinksDTO.getPercentageOfTotal()).isCloseTo(25.0, within(0.01));
-    }
-}
+                .filter(d -> "Drinks".equals(d.getCategoryName())).findFirst()

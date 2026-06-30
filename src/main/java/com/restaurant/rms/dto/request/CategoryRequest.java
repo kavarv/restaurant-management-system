@@ -15,5 +15,4 @@ public class CategoryRequest {
 
     private Integer displayOrder;
 
-    private Boolean isActive = true;
-}
+    private Boolean is

@@ -19,6 +19,4 @@ public class InvalidOperationException extends RuntimeException {
     }
 
     public InvalidOperationException(String operation, String reason) {
-        super(String.format("Cannot perform '%s': %s", operation, reason));
-    }
-}
+        super(String.format("Cannot perform '%s': %s", operatio

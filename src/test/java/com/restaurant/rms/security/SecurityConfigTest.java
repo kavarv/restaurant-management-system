@@ -276,11 +276,4 @@ class SecurityConfigTest {
 
         @Test
         @WithMockUser
-        @DisplayName("POST /logout redirects to /login?logout=true")
-        void logoutRedirectsToLogin() throws Exception {
-            mockMvc.perform(post("/logout").with(csrf()))
-                   .andExpect(status().is3xxRedirection())
-                   .andExpect(redirectedUrl("/login?logout=true"));
-        }
-    }
-}
+        @DisplayName("POST /logout redirects to /lo

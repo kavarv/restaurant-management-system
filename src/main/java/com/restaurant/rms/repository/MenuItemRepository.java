@@ -82,7 +82,4 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
             SELECT m FROM MenuItem m
             WHERE (LOWER(m.name) LIKE LOWER(CONCAT('%', :term, '%'))
                 OR LOWER(m.description) LIKE LOWER(CONCAT('%', :term, '%')))
-              AND m.isAvailable = true
-            """)
-    List<MenuItem> searchByTerm(@Param("term") String term);
-}
+              AND m.isAvailable = t

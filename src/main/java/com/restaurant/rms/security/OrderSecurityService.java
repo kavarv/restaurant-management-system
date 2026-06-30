@@ -107,7 +107,4 @@ public class OrderSecurityService {
      */
     private boolean hasRole(Authentication authentication, Role role) {
         String authority = "ROLE_" + role.name();
-        return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(authority));
-    }
-}
+        return authenti

@@ -51,6 +51,4 @@ public class ReservationRequest {
                         message = "Party size must be between 1 and 20")
     private Integer partySize;
 
-    @Size(max = 1000, message = "Notes must not exceed 1000 characters")
-    private String notes;
-}
+    @Size(max = 1000, message = "Notes must not 

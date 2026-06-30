@@ -51,6 +51,4 @@ public class RegisterRequest {
     )
     private String phone;
 
-    @NotNull(message = "Role is required")
-    private Role role;
-}
+    @NotNull(me

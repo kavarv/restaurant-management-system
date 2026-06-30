@@ -3,6 +3,7 @@ package com.restaurant.rms.service.impl;
 import com.restaurant.rms.dto.request.ReservationRequest;
 import com.restaurant.rms.dto.response.PagedResponse;
 import com.restaurant.rms.dto.response.ReservationResponse;
+import com.restaurant.rms.dto.response.TableResponse;
 import com.restaurant.rms.entity.Reservation;
 import com.restaurant.rms.entity.RestaurantTable;
 import com.restaurant.rms.entity.User;
@@ -175,11 +176,4 @@ public class ReservationServiceImpl implements ReservationService {
         int end   = Math.min(start + pageable.getPageSize(), all.size());
         List<Reservation> pageContent = start < all.size() ? all.subList(start, end) : List.of();
         Page<Reservation> page = new PageImpl<>(pageContent, pageable, all.size());
-        return PagedResponse.from(page, ReservationResponse::from);
-    }
-
-    private Reservation getOrThrow(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation", "id", id));
-    }
-}
+        return PagedResponse.from(page,

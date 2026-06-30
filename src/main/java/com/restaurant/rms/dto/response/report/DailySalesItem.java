@@ -7,5 +7,4 @@ import java.time.LocalDate;
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class DailySalesItem {
     private LocalDate date;
-    private BigDecimal revenue;
-}
+    private BigDecimal re

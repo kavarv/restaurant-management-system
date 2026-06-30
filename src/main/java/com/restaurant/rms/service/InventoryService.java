@@ -75,7 +75,4 @@ public interface InventoryService {
     /**
      * Returns all items whose current stock is below their minimum threshold.
      *
-     * @return list of low-stock items
-     */
-    List<InventoryItemResponse> findLowStockItems();
-}
+     * @return list of lo

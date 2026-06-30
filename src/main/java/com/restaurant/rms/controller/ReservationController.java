@@ -88,8 +88,4 @@ public class ReservationController {
             reservationService.cancel(id);
             redirectAttrs.addFlashAttribute("successMsg", "Reservation cancelled.");
         } catch (Exception ex) {
-            redirectAttrs.addFlashAttribute("errorMsg", ex.getMessage());
-        }
-        return "redirect:/reservations";
-    }
-}
+            redirectAttrs.addFlashAttribute

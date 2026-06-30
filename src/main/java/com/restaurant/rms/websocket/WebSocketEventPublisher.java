@@ -176,7 +176,4 @@ public class WebSocketEventPublisher {
 
     /** Extracts the authenticated username from the Security context. */
     private String resolveCurrentUsername() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return (auth != null && auth.isAuthenticated()) ? auth.getName() : "system";
-    }
-}
+ 

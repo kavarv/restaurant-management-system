@@ -164,9 +164,4 @@ public class OrderApiController {
     })
     public ResponseEntity<Void> cancel(
             @Parameter(description = "Order ID", example = "100") @PathVariable Long id,
-            @Parameter(description = "Cancellation reason", example = "Customer changed their mind")
-            @RequestParam(required = false) String reason) {
-        orderService.cancelOrder(id, reason);
-        return ResponseEntity.noContent().build();
-    }
-}
+            @Parameter(description = "Cancellation reason", example = "Customer changed their mind")

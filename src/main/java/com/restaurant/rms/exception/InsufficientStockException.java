@@ -30,5 +30,4 @@ public class InsufficientStockException extends RuntimeException {
 
     public String getItemName()     { return itemName; }
     public BigDecimal getRequired() { return required; }
-    public BigDecimal getAvailable(){ return available; }
-}
+    public BigDecimal getAva

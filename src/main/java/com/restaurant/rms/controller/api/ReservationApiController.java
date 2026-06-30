@@ -3,6 +3,7 @@ package com.restaurant.rms.controller.api;
 import com.restaurant.rms.dto.request.ReservationRequest;
 import com.restaurant.rms.dto.response.PagedResponse;
 import com.restaurant.rms.dto.response.ReservationResponse;
+import com.restaurant.rms.dto.response.TableResponse;
 import com.restaurant.rms.entity.enums.ReservationStatus;
 import com.restaurant.rms.security.UserPrincipal;
 import com.restaurant.rms.service.ReservationService;
@@ -24,6 +25,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reservations")
@@ -62,6 +66,19 @@ public class ReservationApiController {
                 reservationService.findByCustomer(principal.getId(), PageRequest.of(page, size)));
     }
 
+    @GetMapping("/available-tables")
+    @Operation(summary = "Find available tables",
+               description = "Returns tables that are AVAILABLE, have capacity >= partySize, " +
+                             "and have no conflicting reservation in the ±2-hour window.")
+    public ResponseEntity<List<TableResponse>> availableTables(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam String time,
+            @RequestParam int partySize) {
+        LocalTime lt = LocalTime.parse(time);
+        LocalDateTime when = LocalDateTime.of(date, lt);
+        return ResponseEntity.ok(reservationService.findAvailableTables(partySize, when));
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     @Operation(summary = "List reservations", description = "Paginated list with optional date and status filters.")
@@ -79,27 +96,4 @@ public class ReservationApiController {
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     @Operation(summary = "Get reservation by ID")
     public ResponseEntity<ReservationResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(reservationService.findById(id));
-    }
-
-    @PatchMapping("/{id}/confirm")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
-    @Operation(summary = "Confirm a reservation", description = "Transitions PENDING → CONFIRMED.")
-    public ResponseEntity<ReservationResponse> confirm(@PathVariable Long id) {
-        return ResponseEntity.ok(reservationService.confirm(id));
-    }
-
-    @PatchMapping("/{id}/cancel")
-    @Operation(summary = "Cancel a reservation")
-    public ResponseEntity<ReservationResponse> cancel(@PathVariable Long id) {
-        return ResponseEntity.ok(reservationService.cancel(id));
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
-    @Operation(summary = "Delete / hard-cancel a reservation")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationService.cancel(id);
-        return ResponseEntity.noContent().build();
-    }
-}
+      

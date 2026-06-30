@@ -43,6 +43,4 @@ public class MenuItemMapper {
         if (request.getIsGlutenFree() != null) item.setIsGlutenFree(request.getIsGlutenFree());
         if (request.getImageUrl()     != null) item.setImageUrl(request.getImageUrl());
         if (request.getPreparationTimeMinutes() != null) item.setPreparationTimeMinutes(request.getPreparationTimeMinutes());
-        if (request.getCalories()     != null) item.setCalories(request.getCalories());
-    }
-}
+        if (request.getCalories()     != null) item

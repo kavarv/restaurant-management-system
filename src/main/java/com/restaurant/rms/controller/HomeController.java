@@ -12,6 +12,4 @@ public class HomeController {
 
     @GetMapping("/")
     public String landingPage() {
-        return "index";
-    }
-}
+        return "in

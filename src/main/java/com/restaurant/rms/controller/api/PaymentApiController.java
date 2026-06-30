@@ -70,6 +70,4 @@ public class PaymentApiController {
     })
     public ResponseEntity<PaymentResponse> refund(
             @Parameter(description = "Payment ID", example = "55") @PathVariable Long paymentId) {
-        return ResponseEntity.ok(paymentService.refund(paymentId));
-    }
-}
+    

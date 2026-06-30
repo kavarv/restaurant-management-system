@@ -191,10 +191,4 @@ public class AuditServiceImpl implements AuditService {
         }
         Object principal = auth.getPrincipal();
         if (principal instanceof UserPrincipal up) {
-            return userRepository.findById(up.getId()).orElse(null);
-        }
-        // Fallback: look up by username string
-        String username = auth.getName();
-        return userRepository.findByUsername(username).orElse(null);
-    }
-}
+            return userRepository.findById(up.getId()

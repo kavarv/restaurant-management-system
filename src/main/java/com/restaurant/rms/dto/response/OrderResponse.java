@@ -42,6 +42,7 @@ public class OrderResponse {
     private BigDecimal totalAmount;
     private String deliveryAddress;
     private List<OrderItemResponse> items;
+    private int itemCount;
     private PaymentResponse payment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -69,6 +70,7 @@ public class OrderResponse {
                 .items(order.getItems() != null
                         ? order.getItems().stream().map(OrderItemResponse::from).toList()
                         : List.of())
+                .itemCount(order.getItems() != null ? order.getItems().size() : 0)
                 .payment(order.getPayment() != null ? PaymentResponse.from(order.getPayment()) : null)
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
@@ -79,12 +81,4 @@ public class OrderResponse {
         if (s == null) return 0;
         return switch (s) {
             case PENDING   -> 0;
-            case CONFIRMED -> 1;
-            case PREPARING -> 2;
-            case READY     -> 3;
-            case SERVED    -> 4;
-            case COMPLETED -> 5;
-            default        -> 0;
-        };
-    }
-}
+            case CONFIRM

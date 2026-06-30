@@ -157,8 +157,4 @@ class MenuItemServiceTest {
 
         MenuItemResponse response = service.restore(10L);
 
-        assertThat(response.getId()).isEqualTo(10L);
-        assertThat(item.getDeletedAt()).isNull();
-        verify(auditService).log(eq("MenuItem"), eq(10L), any(), any(), any(), any());
-    }
-}
+        assertThat(response.getId()).is

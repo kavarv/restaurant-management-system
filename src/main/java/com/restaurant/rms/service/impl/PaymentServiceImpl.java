@@ -88,7 +88,4 @@ public class PaymentServiceImpl implements PaymentService {
         Payment saved = paymentRepository.save(payment);
         auditService.log("Payment", paymentId, AuditAction.UPDATE,
                 PaymentStatus.COMPLETED.name(), PaymentStatus.REFUNDED.name());
-        log.info("Refunded payment id={}", paymentId);
-        return PaymentResponse.from(saved);
-    }
-}
+        log.info(

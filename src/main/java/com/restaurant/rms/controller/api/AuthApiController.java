@@ -118,8 +118,4 @@ public class AuthApiController {
         }
         return ResponseEntity.ok(Map.of(
             "token",      csrfToken.getToken(),
-            "headerName", csrfToken.getHeaderName(),
-            "paramName",  csrfToken.getParameterName()
-        ));
-    }
-}
+        

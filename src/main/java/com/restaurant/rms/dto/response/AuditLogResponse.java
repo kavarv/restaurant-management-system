@@ -37,7 +37,4 @@ public class AuditLogResponse {
                 .oldValues(log.getOldValues())
                 .newValues(log.getNewValues())
                 .ipAddress(log.getIpAddress())
-                .changedAt(log.getChangedAt())
-                .build();
-    }
-}
+                .changedAt(log.getChangedA

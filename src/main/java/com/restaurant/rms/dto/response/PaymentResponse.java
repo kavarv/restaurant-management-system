@@ -35,7 +35,4 @@ public class PaymentResponse {
                 .status(payment.getStatus())
                 .transactionId(payment.getTransactionId())
                 .paidAt(payment.getPaidAt())
-                .createdAt(payment.getCreatedAt())
-                .build();
-    }
-}
+                .createdAt(payment.getCreatedAt(

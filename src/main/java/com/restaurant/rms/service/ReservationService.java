@@ -3,10 +3,13 @@ package com.restaurant.rms.service;
 import com.restaurant.rms.dto.request.ReservationRequest;
 import com.restaurant.rms.dto.response.PagedResponse;
 import com.restaurant.rms.dto.response.ReservationResponse;
+import com.restaurant.rms.dto.response.TableResponse;
 import com.restaurant.rms.entity.enums.ReservationStatus;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Manages table reservations (create, confirm, cancel, query).
@@ -30,7 +33,4 @@ public interface ReservationService {
      *
      * @param customerId ID of the authenticated customer
      * @param pageable   pagination parameters
-     * @return paged list of the customer's reservations
-     */
-    PagedResponse<ReservationResponse> findByCustomer(Long customerId, Pageable pageable);
-}
+     * @return

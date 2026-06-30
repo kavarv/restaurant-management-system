@@ -8,5 +8,4 @@ public enum AuditAction {
     UPDATE,
     DELETE,
     /** Soft-deleted record restored back to active state. */
-    RESTORE
-}
+    

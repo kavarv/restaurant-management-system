@@ -131,7 +131,4 @@ public class InventoryApiController {
     })
     public ResponseEntity<InventoryItemResponse> adjustStock(
             @Parameter(description = "Inventory item ID", example = "7") @PathVariable Long id,
-            @Valid @RequestBody AdjustStockRequest request) {
-        return ResponseEntity.ok(inventoryService.adjustStock(id, request));
-    }
-}
+            @V

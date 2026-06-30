@@ -177,10 +177,4 @@ public class AdminController {
 
         PagedResponse<AuditLogResponse> activity =
                 auditService.findByUser(userId,
-                        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "changedAt")));
-
-        model.addAttribute("activity", activity);
-        model.addAttribute("userId",   userId);
-        return "admin/audit/user-activity";
-    }
-}
+                        PageRequest.of(page, size, Sort.by(Sort.Dire

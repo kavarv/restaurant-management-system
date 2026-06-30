@@ -11,5 +11,4 @@ public class DailySalesReport {
     private BigDecimal totalRevenue;
     private Long totalOrders;
     private BigDecimal averageOrderValue;
-    private List<CategorySalesItem> byCategory;
-}
+    private List<CategorySalesItem> b

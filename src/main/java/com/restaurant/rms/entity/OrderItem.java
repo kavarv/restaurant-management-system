@@ -83,8 +83,4 @@ public class OrderItem extends BaseEntity {
      */
     @PrePersist
     private void snapshotPrice() {
-        if (unitPrice == null && menuItem != null) {
-            unitPrice = menuItem.getPrice();
-        }
-    }
-}
+        if (unitPrice == null &

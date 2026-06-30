@@ -21,6 +21,4 @@ public class OrderItemApiController {
     public ResponseEntity<OrderItemResponse> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody OrderItemStatusUpdateRequest request) {
-        return ResponseEntity.ok(orderItemService.updateItemStatus(id, request));
-    }
-}
+        return ResponseEntity.ok(orderItemService.updateItemStatus(

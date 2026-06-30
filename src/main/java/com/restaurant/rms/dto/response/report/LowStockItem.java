@@ -11,5 +11,4 @@ public class LowStockItem {
     private BigDecimal currentStock;
     private BigDecimal minimumStock;
     private BigDecimal deficit;
-    private String supplierName;
-}
+    private String sup

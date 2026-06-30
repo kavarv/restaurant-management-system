@@ -40,5 +40,4 @@ public class Category extends BaseEntity {
 
     /** LAZY: menu items are loaded separately via MenuItemRepository. */
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private java.util.List<MenuItem> menuItems = new java.util.ArrayList<>();
-}
+    private java.util.List<MenuItem> m

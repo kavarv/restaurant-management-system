@@ -162,7 +162,4 @@ public class MenuItemApiController {
         @ApiResponse(responseCode = "404", description = "Not found",                     content = @Content)
     })
     public ResponseEntity<MenuItemResponse> restore(
-            @Parameter(description = "Menu item ID", example = "42") @PathVariable Long id) {
-        return ResponseEntity.ok(menuItemService.restore(id));
-    }
-}
+ 

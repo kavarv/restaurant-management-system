@@ -41,5 +41,4 @@ public interface PaymentService {
      * @throws com.restaurant.rms.exception.ResourceNotFoundException if payment not found
      * @throws com.restaurant.rms.exception.InvalidOperationException if payment is not in COMPLETED status
      */
-    PaymentResponse refund(Long paymentId);
-}
+   

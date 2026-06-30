@@ -18,5 +18,4 @@ public class UpdateUserRequest {
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).+$",
         message = "Password must contain uppercase, lowercase, digit, and special character"
     )
-    private String password;
-}
+    private

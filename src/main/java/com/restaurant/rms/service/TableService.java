@@ -66,7 +66,4 @@ public interface TableService {
      * Deletes a table (only if it has no active orders).
      *
      * @param id table ID
-     * @throws com.restaurant.rms.exception.InvalidOperationException if table has active orders
-     */
-    void delete(Long id);
-}
+     * @throws com.restaurant.rms.exception.InvalidOperationExcep

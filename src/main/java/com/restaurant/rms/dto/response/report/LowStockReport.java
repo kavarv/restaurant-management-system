@@ -7,5 +7,4 @@ import java.util.List;
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class LowStockReport {
     private List<LowStockItem> items;
-    private int totalLowStockItems;
-}
+    private int totalLowStock

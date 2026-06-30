@@ -105,6 +105,3 @@ class InventoryServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getName()).isEqualTo("Olive Oil");
-        assertThat(result.get(0).getCurrentStock()).isLessThan(result.get(0).getMinimumStock());
-    }
-}

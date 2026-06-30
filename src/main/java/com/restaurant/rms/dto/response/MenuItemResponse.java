@@ -45,7 +45,4 @@ public class MenuItemResponse {
                 .calories(item.getCalories())
                 .createdAt(item.getCreatedAt())
                 .updatedAt(item.getUpdatedAt())
-                .deletedAt(item.getDeletedAt())
-                .build();
-    }
-}
+                .deletedAt(item.get

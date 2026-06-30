@@ -9,5 +9,4 @@ public enum OrderItemStatus {
     PREPARING,
     READY,
     SERVED,
-    CANCELLED
-}
+    C

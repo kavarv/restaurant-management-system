@@ -347,13 +347,4 @@ public class OrderServiceImpl implements OrderService {
 
     private Order getOrderOrThrow(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", id));
-    }
-
-    private OrderResponse toResponseWithItems(Order order) {
-        // Eagerly load items for the response
-        List<OrderItem> items = orderItemRepository.findByOrder(order);
-        order.setItems(new ArrayList<>(items));
-        return OrderResponse.from(order);
-    }
-}
+                .orEls

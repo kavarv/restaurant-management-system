@@ -56,6 +56,4 @@ public class MenuItemRequest {
 
     @PositiveOrZero(message = "Calories cannot be negative")
     @Max(value = 5000, message = "Calorie count seems unrealistically high")
-    @Schema(description = "Approximate calorie count per serving", example = "650")
-    private Integer calories;
-}
+    @Schema(description = "Approximate calorie count per s

@@ -8,5 +8,4 @@ import lombok.Data;
 public class OrderItemStatusUpdateRequest {
 
     @NotNull(message = "Status is required")
-    private OrderItemStatus status;
-}
+    private OrderItemStatus 

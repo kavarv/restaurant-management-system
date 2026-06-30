@@ -9,5 +9,4 @@ public class TopMenuItemReport {
     private String menuItemName;
     private String categoryName;
     private Long totalQuantity;
-    private BigDecimal totalRevenue;
-}
+    private BigDecimal total

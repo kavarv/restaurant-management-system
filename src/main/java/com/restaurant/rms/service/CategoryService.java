@@ -50,7 +50,4 @@ public interface CategoryService {
      *
      * @param id category ID
      * @throws com.restaurant.rms.exception.ResourceNotFoundException  if not found
-     * @throws com.restaurant.rms.exception.InvalidOperationException  if menu items still reference this category
-     */
-    void delete(Long id);
-}
+     * @throws com.restaurant.rms.exception.InvalidOperationException  if menu items still referenc

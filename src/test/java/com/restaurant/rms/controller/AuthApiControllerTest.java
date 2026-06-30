@@ -101,7 +101,3 @@ class AuthApiControllerTest {
     @Test
     @DisplayName("GET /csrf returns token map")
     void testGetCsrfToken_returnsMap() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/csrf"))
-                .andExpect(status().isOk());
-    }
-}

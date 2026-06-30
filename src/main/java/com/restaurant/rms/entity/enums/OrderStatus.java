@@ -16,6 +16,4 @@ public enum OrderStatus {
     SERVED,
     /** Order was cancelled before completion. */
     CANCELLED,
-    /** Order fully served and payment collected. */
-    COMPLETED
-}
+    /** Order fully served and payment collected. *

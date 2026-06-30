@@ -33,6 +33,4 @@ public class OrderUpdateMessage {
     /** ISO-8601 timestamp of the status change. */
     private LocalDateTime updatedAt;
 
-    /** Username of the staff member who triggered the change. */
-    private String updatedBy;
-}
+    /** Username of the staff member who triggered the change. 

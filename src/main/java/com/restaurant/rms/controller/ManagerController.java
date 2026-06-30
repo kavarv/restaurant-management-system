@@ -42,7 +42,4 @@ public class ManagerController {
         model.addAttribute("lowStockItems", inventoryService.findLowStockItems());
         model.addAttribute("activeOrders",  orderService.findAll(
                 PageRequest.of(0, 10), null, today, today, null, null));
-
-        return "manager/dashboard";
-    }
-}
+

@@ -196,3 +196,4 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- Make customer_id nullable so walk-in / public bookings don't need an account
 -- NOTE: column additions (customer_name, customer_email, customer_phone) are
 -- handled by Hibernate ddl-auto=update from the entity definition.
+   

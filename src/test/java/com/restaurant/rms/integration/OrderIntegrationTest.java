@@ -100,8 +100,4 @@ class OrderIntegrationTest {
     }
 
     private OrderResponse transition(Long orderId, OrderStatus to) {
-        OrderStatusUpdateRequest req = new OrderStatusUpdateRequest();
-        req.setStatus(to);
-        return orderService.updateOrderStatus(orderId, req);
-    }
-}
+        OrderStatusUpdateRequest req = new OrderStatusUpdateReque

@@ -242,12 +242,3 @@ class AuditServiceImplTest {
     }
 
     private AuditLog buildAuditLog(Long id, String entityType, Long entityId, AuditAction action) {
-        AuditLog log = new AuditLog();
-        log.setId(id);
-        log.setEntityType(entityType);
-        log.setEntityId(entityId);
-        log.setAction(action);
-        log.setChangedAt(LocalDateTime.now());
-        return log;
-    }
-}

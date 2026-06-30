@@ -12,5 +12,4 @@ public class WeeklySalesReport {
     private BigDecimal totalRevenue;
     private Long totalOrders;
     private BigDecimal averageOrderValue;
-    private List<DailySalesItem> dailyBreakdown;
-}
+    private List<DailySalesItem> dail

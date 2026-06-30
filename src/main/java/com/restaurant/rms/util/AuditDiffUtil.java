@@ -99,8 +99,4 @@ public class AuditDiffUtil {
         } catch (Exception ex) {
             log.warn("AuditDiffUtil: cannot parse JSON snapshot — returning raw string: {}",
                     ex.getMessage());
-            // Wrap the raw string so the UI can still show something
-            return Map.of("_raw", json);
-        }
-    }
-}
+            // Wrap the raw 

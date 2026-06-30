@@ -161,9 +161,4 @@ public class GlobalExceptionHandler {
     private ErrorResponse error(HttpStatus status, String message, HttpServletRequest request) {
         return ErrorResponse.builder()
                 .status(status.value())
-                .error(status.getReasonPhrase())
-                .message(message)
-                .path(request.getRequestURI())
-                .build();
-    }
-}
+ 

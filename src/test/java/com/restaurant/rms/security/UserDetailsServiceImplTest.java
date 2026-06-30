@@ -110,8 +110,4 @@ class UserDetailsServiceImplTest {
         UserPrincipal principal = UserPrincipal.fromUser(activeUser);
 
         assertThat(principal.getRole()).isEqualTo(Role.CHEF);
-        assertThat(principal.getAuthorities())
-                .extracting("authority")
-                .containsExactly("ROLE_CHEF");
-    }
-}
+        assertThat(principal.ge

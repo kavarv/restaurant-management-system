@@ -137,8 +137,4 @@ public class WebSocketController {
                         .tableNumber(t.getTableNumber())
                         .capacity(t.getCapacity())
                         .status(t.getStatus())
-                        .locationDescription(t.getLocationDescription())
-                        .build())
-                .toList();
-    }
-}
+   

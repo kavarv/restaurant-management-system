@@ -93,8 +93,4 @@ public class Order extends BaseEntity {
      */
     @PrePersist
     private void prePersist() {
-        if (totalAmount == null) {
-            totalAmount = BigDecimal.ZERO;
-        }
-    }
-}
+ 

@@ -73,6 +73,4 @@ class InventoryIntegrationTest {
         orderService.cancelOrder(orderId, "Integration test cancel");
 
         InventoryItemResponse afterCancel = inventoryService.findById(1L);
-        assertThat(afterCancel.getCurrentStock()).isEqualByComparingTo(stockBefore);
-    }
-}
+        assertThat

@@ -12,5 +12,4 @@ public class LowStockReportDTO {
     private BigDecimal currentStock;
     private BigDecimal reorderThreshold;
     private BigDecimal deficit;
-    private String supplierName;
-}
+    private String su

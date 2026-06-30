@@ -68,7 +68,4 @@ public interface MenuItemService {
      * @param id menu item ID (must reference a soft-deleted row)
      * @return restored menu item DTO
      * @throws com.restaurant.rms.exception.ResourceNotFoundException if not found
-     * @throws com.restaurant.rms.exception.InvalidOperationException if the item is not currently deleted
-     */
-    MenuItemResponse restore(Long id);
-}
+     * @throws com.restaurant.rms.exception.InvalidOperationException if the item is n

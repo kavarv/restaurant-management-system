@@ -153,8 +153,4 @@ class MenuItemApiControllerTest {
         when(menuItemService.findById(999L))
                 .thenThrow(new ResourceNotFoundException("MenuItem", "id", 999L));
 
-        mockMvc.perform(get("/api/v1/menu/999"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message", containsString("MenuItem")));
-    }
-}
+        mockMvc.perform(get("/a

@@ -48,7 +48,4 @@ public class TableCapacityValidator
         context.buildConstraintViolationWithTemplate(
                 String.format("Table capacity must be between %d and %d (provided: %d)",
                         min, max, value))
-               .addConstraintViolation();
-        return false;
-    }
-}
+               .addCon

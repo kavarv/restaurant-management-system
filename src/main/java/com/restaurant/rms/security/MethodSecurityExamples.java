@@ -77,6 +77,4 @@ package com.restaurant.rms.security;
  * </ul>
  */
 public final class MethodSecurityExamples {
-    // Reference document only — no instances.
-    private MethodSecurityExamples() {}
-}
+    // Refer

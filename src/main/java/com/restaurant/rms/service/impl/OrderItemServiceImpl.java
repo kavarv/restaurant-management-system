@@ -68,8 +68,4 @@ public class OrderItemServiceImpl implements OrderItemService {
         return switch (from) {
             case PENDING   -> to == OrderItemStatus.PREPARING || to == OrderItemStatus.CANCELLED;
             case PREPARING -> to == OrderItemStatus.READY    || to == OrderItemStatus.CANCELLED;
-            case READY     -> to == OrderItemStatus.SERVED   || to == OrderItemStatus.CANCELLED;
-            default        -> false;
-        };
-    }
-}
+            case READY     -> to == OrderItemStatus.SERVED   || to == OrderItemStat

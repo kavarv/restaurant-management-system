@@ -37,6 +37,4 @@ public @interface ValidTableCapacity {
     /** Minimum allowed capacity. Override per use-site if needed. */
     int min() default 1;
 
-    /** Maximum allowed capacity. Override per use-site if needed. */
-    int max() default 20;
-}
+    /** Maximum allowed capacity. Override per use-site if 

@@ -44,5 +44,4 @@ public class ErrorResponse {
     private String path;
 
     /** Present only for {@code MethodArgumentNotValidException} (HTTP 400). */
-    private Map<String, String> fieldErrors;
-}
+ 

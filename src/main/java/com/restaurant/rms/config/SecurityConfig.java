@@ -195,19 +195,4 @@ public class SecurityConfig {
                     String uri = request.getRequestURI();
                     if (uri.startsWith("/api/")) {
                         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                        objectMapper.writeValue(response.getWriter(), Map.of(
-                            "status",  403,
-                            "error",   "Forbidden",
-                            "message", "You do not have permission to access this resource.",
-                            "path",    uri
-                        ));
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/403");
-                    }
-                })
-            );
-
-        return http.build();
-    }
-}
+                        response.setContentType(Media

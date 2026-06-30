@@ -95,8 +95,4 @@ public class InventoryController {
             redirectAttrs.addFlashAttribute("successMsg", "Stock adjusted.");
         } catch (Exception ex) {
             log.warn("Stock adjust failed: {}", ex.getMessage());
-            redirectAttrs.addFlashAttribute("errorMsg", ex.getMessage());
-        }
-        return "redirect:/inventory";
-    }
-}
+            redirectAttrs.addFlas

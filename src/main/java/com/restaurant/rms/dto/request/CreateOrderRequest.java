@@ -34,6 +34,4 @@ public class CreateOrderRequest {
     @Schema(description = "Delivery address (required for DELIVERY orders)", example = "123 Main Street, Apt 4B")
     private String deliveryAddress;
 
-    @Schema(description = "Waiter user ID — populated server-side from the session; only set this if a manager is assigning to a specific waiter", example = "12")
-    private Long waiterId;
-}
+    @Schema(description = "Waiter user ID — populated server-side from the session; only set this if a manager is assigning to a specific waiter", example =

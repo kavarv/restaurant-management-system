@@ -92,7 +92,4 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
                 com.restaurant.rms.entity.enums.OrderItemStatus.PENDING,
                 com.restaurant.rms.entity.enums.OrderItemStatus.PREPARING
             )
-            ORDER BY oi.createdAt ASC
-            """)
-    List<OrderItem> findAllPendingKitchenItems();
-}
+            O

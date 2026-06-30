@@ -52,6 +52,4 @@ public class TableApiController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         tableService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-}
+     

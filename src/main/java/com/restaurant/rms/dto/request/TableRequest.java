@@ -19,5 +19,4 @@ public class TableRequest {
     private TableStatus status = TableStatus.AVAILABLE;
 
     @Size(max = 100)
-    private String locationDescription;
-}
+    private String lo

@@ -12,6 +12,4 @@ public enum ReservationStatus {
     CANCELLED,
     /** Guest arrived, dined, and departed; reservation closed successfully. */
     COMPLETED,
-    /** Guest never arrived for a confirmed reservation. */
-    NO_SHOW
-}
+    /** Guest never arrived for a confirmed reservation. */

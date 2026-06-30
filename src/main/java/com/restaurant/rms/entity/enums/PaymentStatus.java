@@ -11,5 +11,4 @@ public enum PaymentStatus {
     /** Gateway rejected the payment. */
     FAILED,
     /** Payment was reversed after initial completion. */
-    REFUNDED
-}
+  

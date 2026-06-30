@@ -220,10 +220,3 @@ public class PdfExportService {
             if (pageCountTemplate != null && baseFont != null) {
                 pageCountTemplate.beginText();
                 pageCountTemplate.setFontAndSize(baseFont, 8);
-                pageCountTemplate.setTextMatrix(0, 0);
-                pageCountTemplate.showText(String.valueOf(writer.getPageNumber() - 1));
-                pageCountTemplate.endText();
-            }
-        }
-    }
-}

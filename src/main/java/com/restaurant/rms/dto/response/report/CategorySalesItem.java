@@ -8,5 +8,4 @@ public class CategorySalesItem {
     private Long categoryId;
     private String categoryName;
     private BigDecimal revenue;
-    private Long orderCount;
-}
+    private Long orde

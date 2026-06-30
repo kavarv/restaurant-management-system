@@ -66,7 +66,4 @@ public class Reservation extends BaseEntity {
     @PrePersist
     private void generateConfirmationCode() {
         if (confirmationCode == null || confirmationCode.isBlank()) {
-            confirmationCode = "RES-" + System.currentTimeMillis() % 1_000_000;
-        }
-    }
-}
+            confirmationCode =

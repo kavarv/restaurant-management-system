@@ -137,9 +137,4 @@ class OrderApiControllerTest {
     void testCancelOrder_returns204() throws Exception {
         doNothing().when(orderService).cancelOrder(100L, null);
 
-        mockMvc.perform(delete("/api/v1/orders/100").with(csrf()))
-                .andExpect(status().isNoContent());
-
-        verify(orderService).cancelOrder(100L, null);
-    }
-}
+        mockMvc.perform(delete("/api/v1/ord

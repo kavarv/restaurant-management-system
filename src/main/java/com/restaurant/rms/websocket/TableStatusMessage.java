@@ -19,5 +19,4 @@ public class TableStatusMessage {
     private Integer tableNumber;
     private Integer capacity;
     private TableStatus status;
-    private String locationDescription;
-}
+    private String lo

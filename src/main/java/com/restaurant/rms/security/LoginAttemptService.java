@@ -107,7 +107,4 @@ public class LoginAttemptService {
         int size = attempts.size();
         attempts.clear();
         if (size > 0) {
-            log.info("Login throttle: cleared {} attempt counter(s) on scheduled reset", size);
-        }
-    }
-}
+     

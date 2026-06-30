@@ -79,7 +79,4 @@ public class OpenApiConfig {
                 new Tag().name("reservations") .description("Reservations — booking, confirmation, cancellation"),
                 new Tag().name("payments")     .description("Payments — processing and receipt retrieval"),
                 new Tag().name("reports")      .description("Reports — sales, revenue, top items, CSV/PDF export"),
-                new Tag().name("tables")       .description("Restaurant tables — status and capacity management")
-        );
-    }
-}
+                new Tag().name("tables")       .descri

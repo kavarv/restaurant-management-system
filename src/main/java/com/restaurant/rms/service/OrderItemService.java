@@ -29,5 +29,4 @@ public interface OrderItemService {
      * @return list of order item DTOs
      * @throws com.restaurant.rms.exception.ResourceNotFoundException if order not found
      */
-    List<OrderItemResponse> findByOrder(Long orderId);
-}
+    List<OrderItemResponse

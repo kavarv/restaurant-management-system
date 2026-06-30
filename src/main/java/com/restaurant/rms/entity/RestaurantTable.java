@@ -51,5 +51,4 @@ public class RestaurantTable extends BaseEntity {
 
     /** LAZY: reservation lists are loaded only in the reservation context. */
     @OneToMany(mappedBy = "table", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private java.util.List<Reservation> reservations = new java.util.ArrayList<>();
-}
+    private java.util.List<Reserv

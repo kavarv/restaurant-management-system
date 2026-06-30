@@ -51,7 +51,4 @@ public class PagedResponse<T> {
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
                 .first(page.isFirst())
-                .last(page.isLast())
-                .build();
-    }
-}
+                .l

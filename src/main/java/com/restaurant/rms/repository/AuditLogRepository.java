@@ -58,6 +58,4 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
             ORDER BY a.entityType, a.action
             """)
     List<Object[]> getActivitySummary(
-            @Param("start") LocalDateTime start,
-            @Param("end")   LocalDateTime end);
-}
+            @Param("start") LocalDateTi

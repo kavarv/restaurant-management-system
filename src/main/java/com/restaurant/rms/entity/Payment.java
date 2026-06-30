@@ -64,6 +64,4 @@ public class Payment extends BaseEntity {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
-    @Column(name = "gateway_response", columnDefinition = "TEXT")
-    private String gatewayResponse;
-}
+    @Column(name = "gateway_response",

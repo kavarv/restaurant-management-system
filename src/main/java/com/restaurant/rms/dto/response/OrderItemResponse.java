@@ -38,7 +38,4 @@ public class OrderItemResponse {
                 .specialNotes(item.getSpecialNotes())
                 .status(item.getStatus())
                 .preparationTimeMinutes(item.getMenuItem() != null
-                        ? item.getMenuItem().getPreparationTimeMinutes() : null)
-                .build();
-    }
-}
+                        ? item.getMenuItem().getPreparationTimeMinutes() : 

@@ -11,6 +11,4 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public UserResponse toResponse(User user) {
-        return UserResponse.from(user);
-    }
-}
+        return UserResponse.from(us

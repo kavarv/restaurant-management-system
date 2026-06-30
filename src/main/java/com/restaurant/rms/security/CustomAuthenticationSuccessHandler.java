@@ -79,7 +79,4 @@ public class CustomAuthenticationSuccessHandler
             case "ROLE_WAITER"   -> "/orders";
             case "ROLE_CHEF"     -> "/kitchen";
             case "ROLE_CUSTOMER" -> "/menu";
-            default              -> "/dashboard";   // future-proof fallback
-        };
-    }
-}
+            def

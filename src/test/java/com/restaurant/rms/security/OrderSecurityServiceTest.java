@@ -140,8 +140,4 @@ class OrderSecurityServiceTest {
     }
 
     private void stubOrder(Long id, OrderStatus status) {
-        Order order = mock(Order.class);
-        when(order.getStatus()).thenReturn(status);
-        when(orderRepository.findById(id)).thenReturn(Optional.of(order));
-    }
-}
+        Order order = mock(Order.c

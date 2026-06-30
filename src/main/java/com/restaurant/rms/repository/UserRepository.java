@@ -56,6 +56,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Soft-deactivation check — confirms the account is not already inactive
      * before triggering a deactivation flow.
-     */
-    Optional<User> findByIdAndIsActiveTrue(Long id);
-}
+     

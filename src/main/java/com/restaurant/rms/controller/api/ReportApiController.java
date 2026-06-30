@@ -48,6 +48,4 @@ public class ReportApiController {
 
     @GetMapping("/low-stock")
     public ResponseEntity<LowStockReport> lowStock() {
-        return ResponseEntity.ok(reportService.getLowStockReport());
-    }
-}
+        return ResponseEnti

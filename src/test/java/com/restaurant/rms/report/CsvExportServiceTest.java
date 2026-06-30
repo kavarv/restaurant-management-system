@@ -174,10 +174,4 @@ class CsvExportServiceTest {
 
         StringWriter out = new StringWriter();
         assertThatNoException().isThrownBy(
-                () -> csvExportService.exportLowStockToCsv(bigList, out));
-
-        // Header + 10 000 data rows
-        long lines = out.toString().lines().filter(l -> !l.isBlank()).count();
-        assertThat(lines).isEqualTo(10_001L);
-    }
-}
+                () -> csvExportService.exportLowStockToCsv(bigList, ou

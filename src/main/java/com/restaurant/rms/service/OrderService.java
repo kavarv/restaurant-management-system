@@ -113,8 +113,3 @@ public interface OrderService {
     /**
      * Marks an order as COMPLETED (shortcut for updateOrderStatus → COMPLETED).
      *
-     * @param id order ID
-     * @return completed order DTO
-     */
-    OrderResponse completeOrder(Long id);
-}

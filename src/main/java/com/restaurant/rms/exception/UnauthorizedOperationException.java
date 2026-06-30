@@ -17,6 +17,4 @@ public class UnauthorizedOperationException extends RuntimeException {
     }
 
     public UnauthorizedOperationException(String action, String resourceType) {
-        super(String.format("You are not authorised to %s this %s", action, resourceType));
-    }
-}
+        super(String.format("You are not authorised to %s this %s", action, resou

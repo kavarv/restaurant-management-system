@@ -99,6 +99,4 @@ public class TableServiceImpl implements TableService {
 
     private RestaurantTable getTableOrThrow(Long id) {
         return tableRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("RestaurantTable", "id", id));
-    }
-}
+   

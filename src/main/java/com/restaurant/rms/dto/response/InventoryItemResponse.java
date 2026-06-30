@@ -31,6 +31,4 @@ public class InventoryItemResponse {
                 .lowStock(i.getCurrentStock().compareTo(i.getMinimumStock()) < 0)
                 .createdAt(i.getCreatedAt())
                 .updatedAt(i.getUpdatedAt())
-                .build();
-    }
-}
+ 

@@ -9,5 +9,4 @@ public enum OrderType {
     /** Guest orders and picks up themselves. */
     TAKEAWAY,
     /** Order delivered to an external address. */
-    DELIVERY
-}
+    

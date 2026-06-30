@@ -77,7 +77,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 });
 
         log.debug("Loaded UserPrincipal for username='{}' role='{}'", user.getUsername(), user.getRole());
-        // Wrap into a rich principal that exposes id, email, and role to controllers.
-        return UserPrincipal.fromUser(user);
-    }
-}
+        // Wrap into a rich principal that exposes id, email,

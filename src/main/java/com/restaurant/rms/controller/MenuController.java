@@ -102,8 +102,4 @@ public class MenuController {
             redirectAttrs.addFlashAttribute("successMsg", "Menu item removed.");
         } catch (Exception ex) {
             log.warn("Menu item delete failed: {}", ex.getMessage());
-            redirectAttrs.addFlashAttribute("errorMsg", ex.getMessage());
-        }
-        return "redirect:/menu";
-    }
-}
+            redirectA

@@ -10,6 +10,4 @@ class RmsApplicationTests {
 
     @Test
     void contextLoads() {
-        // Verifies the Spring application context starts without errors
-    }
-}
+        // Verifies the Spring application context starts without err

@@ -10,5 +10,4 @@ public class CategoryRevenueDTO {
     private String categoryName;
     private Long orderCount;
     private BigDecimal totalRevenue;
-    private Double percentageOfTotal;
-}
+    private Double percentag

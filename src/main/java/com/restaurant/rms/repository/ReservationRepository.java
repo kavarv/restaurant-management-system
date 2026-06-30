@@ -63,5 +63,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.status = com.restaurant.rms.entity.enums.ReservationStatus.CONFIRMED
               AND r.reservedDate < :now
             """)
-    List<Reservation> findOverdueConfirmedReservations(@Param("now") LocalDateTime now);
-}
+    List<Reservation> find

@@ -47,7 +47,4 @@ public class AuthController {
         } catch (Exception ex) {
             log.warn("Registration failed: {}", ex.getMessage());
             result.reject("registration.failed", ex.getMessage());
-            return "auth/register";
-        }
-    }
-}
+     

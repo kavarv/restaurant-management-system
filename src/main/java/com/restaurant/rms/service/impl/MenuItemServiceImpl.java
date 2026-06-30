@@ -230,10 +230,3 @@ public class MenuItemServiceImpl implements MenuItemService {
     private HttpServletRequest currentRequest() {
         try {
             ServletRequestAttributes attrs =
-                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            return attrs != null ? attrs.getRequest() : null;
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-}

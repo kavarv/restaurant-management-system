@@ -13,5 +13,4 @@ public class AdjustStockRequest {
 
     @NotBlank(message = "Reason is required")
     @Size(max = 500)
-    private String reason;
-}
+    private St

@@ -42,5 +42,4 @@ public interface AuditService {
 
     PagedResponse<AuditLogResponse> findByUser(Long userId, Pageable pageable);
 
-    PagedResponse<AuditLogResponse> findRecent(int limit);
-}
+    PagedResponse

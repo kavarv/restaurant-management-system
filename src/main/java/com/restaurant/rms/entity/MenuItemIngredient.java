@@ -59,6 +59,4 @@ public class MenuItemIngredient extends BaseEntity {
      * Override unit for this specific use — e.g. the inventory item is tracked
      * in "kg" but the recipe calls for "g".  Nullable; falls back to InventoryItem.unit.
      */
-    @Column(name = "unit_override", length = 30)
-    private String unitOverride;
-}
+    @Column(name = "uni

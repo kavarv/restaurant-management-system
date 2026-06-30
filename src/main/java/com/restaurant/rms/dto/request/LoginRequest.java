@@ -14,5 +14,4 @@ public class LoginRequest {
 
     @NotBlank(message = "Password is required")
     @Schema(description = "Account password", example = "Admin@123", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String password;
-}
+    private Str

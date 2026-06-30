@@ -28,5 +28,4 @@ public class PaymentRequest {
      * Optional gateway transaction reference (e.g. Razorpay payment_id).
      * Null for cash payments; the service generates / stores this for card/UPI.
      */
-    private String transactionId;
-}
+    pr

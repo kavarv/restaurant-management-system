@@ -25,6 +25,4 @@ public class UserResponse {
                 .role(u.getRole())
                 .isActive(u.getIsActive())
                 .createdAt(u.getCreatedAt())
-                .build();
-    }
-}
+       

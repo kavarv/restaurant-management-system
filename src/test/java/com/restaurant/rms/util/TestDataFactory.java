@@ -165,10 +165,4 @@ public final class TestDataFactory {
         return r;
     }
 
-    public static LoginRequest loginRequest(String username, String password) {
-        LoginRequest r = new LoginRequest();
-        r.setUsername(username);
-        r.setPassword(password);
-        return r;
-    }
-}
+    public static LoginRequest loginRequest(String

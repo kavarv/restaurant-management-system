@@ -114,9 +114,4 @@ public final class PdfTableHelper {
         line.setBorderWidthBottom(1.5f);
         line.setBorderWidthTop(0);
         line.setBorderWidthLeft(0);
-        line.setBorderWidthRight(0);
-        line.setFixedHeight(1f);
-        rule.addCell(line);
-        return rule;
-    }
-}
+        lin

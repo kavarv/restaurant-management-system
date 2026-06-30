@@ -48,7 +48,4 @@ public abstract class SoftDeletableEntity extends BaseEntity {
      *
      * @return {@code true} if this entity has been soft-deleted.
      */
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
-}
+    public boolean isDele

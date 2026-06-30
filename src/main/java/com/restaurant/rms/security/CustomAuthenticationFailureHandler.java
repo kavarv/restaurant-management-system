@@ -84,7 +84,4 @@ public class CustomAuthenticationFailureHandler
             return;
         }
 
-        // Fall through to the default redirect (/login?error) for form-based logins.
-        super.onAuthenticationFailure(request, response, exception);
-    }
-}
+        // Fall through to the default redirect (/login?error) for form-based

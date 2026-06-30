@@ -1,6 +1,8 @@
 package com.restaurant.rms.controller;
 
 import com.restaurant.rms.dto.request.CreateOrderRequest;
+import com.restaurant.rms.dto.request.OrderStatusUpdateRequest;
+import com.restaurant.rms.entity.enums.OrderStatus;
 import com.restaurant.rms.security.UserPrincipal;
 import com.restaurant.rms.service.MenuItemService;
 import com.restaurant.rms.service.OrderService;
@@ -79,9 +81,4 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','WAITER','CHEF')")
-    public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("order", orderService.findById(id));
-        return "orders/detail";
-    }
-}
+    @PreAuthorize("hasAnyRole('ADMI

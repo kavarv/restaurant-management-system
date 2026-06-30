@@ -52,5 +52,4 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
      * checks whether enough stock exists before decrementing.
      */
     @Query("SELECT i FROM InventoryItem i WHERE i.id IN :ids AND i.currentStock < i.minimumStock")
-    List<InventoryItem> findLowStockByIds(@Param("ids") List<Long> ids);
-}
+    List<InventoryIte

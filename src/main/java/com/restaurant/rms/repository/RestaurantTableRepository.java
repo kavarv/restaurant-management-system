@@ -27,5 +27,4 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
      * Returns Object[]{status VARCHAR, count BIGINT}.
      */
     @Query("SELECT t.status, COUNT(t) FROM RestaurantTable t GROUP BY t.status")
-    List<Object[]> countByStatusGrouped();
-}
+    List<Object[

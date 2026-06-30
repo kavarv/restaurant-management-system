@@ -205,21 +205,4 @@ public class ReportServiceImpl implements ReportService {
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Export-friendly DTO projections
-    // ──────────────────────────────────────────────────────────────────────────
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<LowStockReportDTO> getLowStockReportDTOs() {
-        return inventoryRepository.findAllBelowMinimumStock().stream()
-                .map(i -> LowStockReportDTO.builder()
-                        .inventoryItemId(i.getId())
-                        .itemName(i.getName())
-                        .unit(i.getUnit())
-                        .currentStock(i.getCurrentStock())
-                        .reorderThreshold(i.getMinimumStock())
-                        .deficit(i.getMinimumStock().subtract(i.getCurrentStock()))
-                        .supplierName(i.getSupplierName())
-                        .build())
-                .toList();
-    }
-}
+    // ───────────────────────────────────────────────�

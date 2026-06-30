@@ -20,5 +20,4 @@ public class OrderItemRequest {
     private Integer quantity;
 
     @Size(max = 500, message = "Special notes must not exceed 500 characters")
-    private String specialNotes;
-}
+    private S

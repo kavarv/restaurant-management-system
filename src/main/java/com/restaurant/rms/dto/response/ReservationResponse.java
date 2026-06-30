@@ -54,7 +54,4 @@ public class ReservationResponse {
                 .status(res.getStatus())
                 .notes(res.getNotes())
                 .confirmationCode(res.getConfirmationCode())
-                .createdAt(res.getCreatedAt())
-                .build();
-    }
-}
+                .createdA

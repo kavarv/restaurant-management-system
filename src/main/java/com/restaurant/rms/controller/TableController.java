@@ -68,8 +68,4 @@ public class TableController {
             tableService.update(id, tableRequest);
             redirectAttrs.addFlashAttribute("successMsg", "Table updated.");
         } catch (Exception ex) {
-            redirectAttrs.addFlashAttribute("errorMsg", ex.getMessage());
-        }
-        return "redirect:/tables";
-    }
-}
+            redirectAttrs.addFlashAttribute("errorMsg", e

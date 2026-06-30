@@ -37,7 +37,4 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .accountExpired(false)
                 .accountLocked(!user.getIsActive())
                 .credentialsExpired(false)
-                .disabled(!user.getIsActive())
-                .build();
-    }
-}
+                .disabled(!user.getIsActiv

@@ -15,5 +15,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByName(String name);
 
     /** Menu display — active categories ordered by their display priority. */
-    List<Category> findByIsActiveTrueOrderByDisplayOrderAsc();
-}
+    List<Category> findByIsActiveTrueOrderByDisp

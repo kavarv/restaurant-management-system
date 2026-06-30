@@ -37,5 +37,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     /** Failed-payment queue — for manual investigation or retry. */
     List<Payment> findByStatusAndCreatedAtBetween(
-            PaymentStatus status, LocalDateTime start, LocalDateTime end);
-}
+            PaymentStatus status, Loca

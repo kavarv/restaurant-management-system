@@ -13,5 +13,4 @@ public interface MenuItemIngredientRepository extends JpaRepository<MenuItemIngr
 
     List<MenuItemIngredient> findByInventoryItemId(Long inventoryItemId);
 
-    void deleteByMenuItemId(Long menuItemId);
-}
+    void deleteByMenuItemId(Long 

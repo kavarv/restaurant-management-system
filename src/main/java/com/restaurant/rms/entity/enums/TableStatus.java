@@ -11,5 +11,4 @@ public enum TableStatus {
     /** Table is held for an upcoming reservation. */
     RESERVED,
     /** Table is taken out of service for cleaning or repairs. */
-    MAINTENANCE
-}
+    M

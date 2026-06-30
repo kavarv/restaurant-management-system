@@ -190,40 +190,57 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         record ItemSeed(String name, String desc, BigDecimal price,
-                        Category cat, boolean veg, int prepMins) {}
+                        Category cat, boolean veg, int prepMins, String imageUrl) {}
 
         List<ItemSeed> seeds = List.of(
             // Starters (3)
-            new ItemSeed("Garlic Bread",       "Toasted bread with garlic butter",          bd("4.50"),  starters, true,  5),
-            new ItemSeed("Soup of the Day",    "Chef's daily soup with crusty roll",         bd("6.00"),  starters, false, 10),
-            new ItemSeed("Chicken Wings",      "Crispy wings with BBQ sauce",                bd("8.50"),  starters, false, 15),
+            new ItemSeed("Garlic Bread",       "Toasted bread with garlic butter",          bd("4.50"),  starters, true,  5,
+                "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&q=80"),
+            new ItemSeed("Soup of the Day",    "Chef's daily soup with crusty roll",         bd("6.00"),  starters, false, 10,
+                "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80"),
+            new ItemSeed("Chicken Wings",      "Crispy wings with BBQ sauce",                bd("8.50"),  starters, false, 15,
+                "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80"),
 
             // Mains (5)
-            new ItemSeed("Grilled Salmon",     "Atlantic salmon with seasonal veg",          bd("18.00"), mains,    false, 20),
-            new ItemSeed("Beef Burger",        "8 oz beef patty with fries",                 bd("14.00"), mains,    false, 15),
-            new ItemSeed("Margherita Pizza",   "Classic tomato, mozzarella, basil",          bd("12.00"), mains,    true,  20),
-            new ItemSeed("Pasta Primavera",    "Penne with seasonal vegetables",             bd("11.00"), mains,    true,  15),
-            new ItemSeed("Ribeye Steak",       "300 g ribeye with chips and salad",          bd("28.00"), mains,    false, 25),
+            new ItemSeed("Grilled Salmon",     "Atlantic salmon with seasonal veg",          bd("18.00"), mains,    false, 20,
+                "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&q=80"),
+            new ItemSeed("Beef Burger",        "8 oz beef patty with fries",                 bd("14.00"), mains,    false, 15,
+                "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80"),
+            new ItemSeed("Margherita Pizza",   "Classic tomato, mozzarella, basil",          bd("12.00"), mains,    true,  20,
+                "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80"),
+            new ItemSeed("Pasta Primavera",    "Penne with seasonal vegetables",             bd("11.00"), mains,    true,  15,
+                "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&q=80"),
+            new ItemSeed("Ribeye Steak",       "300 g ribeye with chips and salad",          bd("28.00"), mains,    false, 25,
+                "https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80"),
 
             // Desserts (3)
-            new ItemSeed("Chocolate Fondant",  "Warm chocolate cake with ice cream",         bd("7.00"),  desserts, true,  15),
-            new ItemSeed("Cheesecake",         "New York style with berry coulis",           bd("6.50"),  desserts, true,  5),
-            new ItemSeed("Tiramisu",           "Classic Italian coffee dessert",             bd("6.00"),  desserts, true,  5),
+            new ItemSeed("Chocolate Fondant",  "Warm chocolate cake with ice cream",         bd("7.00"),  desserts, true,  15,
+                "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80"),
+            new ItemSeed("Cheesecake",         "New York style with berry coulis",           bd("6.50"),  desserts, true,  5,
+                "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&q=80"),
+            new ItemSeed("Tiramisu",           "Classic Italian coffee dessert",             bd("6.00"),  desserts, true,  5,
+                "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80"),
 
             // Beverages (2)
-            new ItemSeed("Fresh Orange Juice", "Freshly squeezed orange juice 300 ml",      bd("3.50"),  beverages,true,  2),
-            new ItemSeed("Sparkling Water",    "San Pellegrino 750 ml",                      bd("2.50"),  beverages,true,  1),
+            new ItemSeed("Fresh Orange Juice", "Freshly squeezed orange juice 300 ml",      bd("3.50"),  beverages,true,  2,
+                "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&q=80"),
+            new ItemSeed("Sparkling Water",    "San Pellegrino 750 ml",                      bd("2.50"),  beverages,true,  1,
+                "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80"),
 
             // Specials (2)
-            new ItemSeed("Chef's Fish Special","Daily catch with market vegetables",         bd("22.00"), specials, false, 25),
-            new ItemSeed("Vegan Risotto",      "Seasonal vegetable risotto, dairy-free",    bd("13.00"), specials, true,  20)
+            new ItemSeed("Chef's Fish Special","Daily catch with market vegetables",         bd("22.00"), specials, false, 25,
+                "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&q=80"),
+            new ItemSeed("Vegan Risotto",      "Seasonal vegetable risotto, dairy-free",    bd("13.00"), specials, true,  20,
+                "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80")
         );
 
         int count = 0;
         for (ItemSeed s : seeds) {
-            // Use name as the uniqueness key; skip if already present.
-            if (menuItemRepository.findByCategory(s.cat()).stream()
-                    .noneMatch(m -> m.getName().equals(s.name()))) {
+            // Use name as the uniqueness key.
+            var existing = menuItemRepository.findByCategory(s.cat()).stream()
+                    .filter(m -> m.getName().equals(s.name()))
+                    .findFirst();
+            if (existing.isEmpty()) {
                 menuItemRepository.save(MenuItem.builder()
                     .name(s.name())
                     .description(s.desc())
@@ -232,9 +249,18 @@ public class DataInitializer implements ApplicationRunner {
                     .isAvailable(true)
                     .isVegetarian(s.veg())
                     .preparationTimeMinutes(s.prepMins())
+                    .imageUrl(s.imageUrl())
                     .build());
                 log.info("  Seeded menu item: {}", s.name());
                 count++;
+            } else {
+                // Backfill imageUrl for items seeded before images were added
+                MenuItem item = existing.get();
+                if (item.getImageUrl() == null || item.getImageUrl().isBlank()) {
+                    item.setImageUrl(s.imageUrl());
+                    menuItemRepository.save(item);
+                    log.info("  Updated image for menu item: {}", s.name());
+                }
             }
         }
         return count;
@@ -278,42 +304,4 @@ public class DataInitializer implements ApplicationRunner {
             new InvSeed("Chicken Breast",  "kg",     bd("25"),  bd("10"),  bd("7.00"),  "Meat Market"),
             new InvSeed("Beef Mince",      "kg",     bd("20"),  bd("8"),   bd("9.00"),  "Meat Market"),
             new InvSeed("Salmon Fillet",   "kg",     bd("15"),  bd("5"),   bd("14.00"), "Fish Supplies"),
-            new InvSeed("Ribeye Steak",    "kg",     bd("12"),  bd("4"),   bd("22.00"), "Meat Market"),
-            new InvSeed("Pasta (Penne)",   "kg",     bd("20"),  bd("5"),   bd("1.50"),  "Italian Foods"),
-            new InvSeed("Tomato Sauce",    "litre",  bd("30"),  bd("8"),   bd("2.00"),  "Italian Foods"),
-            new InvSeed("Mozzarella",      "kg",     bd("15"),  bd("5"),   bd("6.00"),  "Dairy Direct"),
-            new InvSeed("Olive Oil",       "litre",  bd("20"),  bd("5"),   bd("5.00"),  "Italian Foods"),
-            new InvSeed("Garlic",          "kg",     bd("10"),  bd("2"),   bd("3.00"),  "Veg Supplies"),
-            new InvSeed("Onions",          "kg",     bd("20"),  bd("5"),   bd("1.00"),  "Veg Supplies"),
-            new InvSeed("Potatoes",        "kg",     bd("40"),  bd("10"),  bd("0.80"),  "Veg Supplies"),
-            new InvSeed("Cream",           "litre",  bd("15"),  bd("4"),   bd("2.50"),  "Dairy Direct"),
-            new InvSeed("Coffee Beans",    "kg",     bd("10"),  bd("3"),   bd("18.00"), "Coffee World"),
-            new InvSeed("Orange Juice",    "litre",  bd("30"),  bd("10"),  bd("1.80"),  "Beverage Co"),
-            new InvSeed("Sparkling Water", "litre",  bd("50"),  bd("15"),  bd("0.60"),  "Beverage Co"),
-            new InvSeed("Chocolate",       "kg",     bd("10"),  bd("3"),   bd("8.00"),  "Choc Supplies")
-        );
-
-        int count = 0;
-        for (InvSeed s : seeds) {
-            if (!inventoryItemRepository.existsByName(s.name())) {
-                inventoryItemRepository.save(InventoryItem.builder()
-                    .name(s.name())
-                    .unit(s.unit())
-                    .currentStock(s.stock())
-                    .minimumStock(s.minStock())
-                    .costPerUnit(s.cost())
-                    .supplierName(s.supplier())
-                    .build());
-                log.info("  Seeded inventory: {}", s.name());
-                count++;
-            }
-        }
-        return count;
-    }
-
-    // ─── helpers ─────────────────────────────────────────────────────────────
-
-    private static BigDecimal bd(String val) {
-        return new BigDecimal(val);
-    }
-}
+            new InvSeed("Ribeye Steak",    "kg",     bd("12"),  bd("4"),   bd("22.00"), "Meat Mark

@@ -41,6 +41,4 @@ public abstract class BaseEntity {
      * the initial INSERT (which Hibernate then immediately corrects to the INSERT time).
      */
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-}
+    @Column(name = "updated_at", nullable = fal

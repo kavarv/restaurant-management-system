@@ -27,6 +27,4 @@ public class BillingController {
     @GetMapping("/checkout/{orderId}")
     public String checkout(@PathVariable Long orderId, Model model) {
         model.addAttribute("order", orderService.findById(orderId));
-        return "billing/checkout";
-    }
-}
+        return

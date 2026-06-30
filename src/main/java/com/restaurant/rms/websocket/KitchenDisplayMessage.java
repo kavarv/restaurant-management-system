@@ -53,7 +53,4 @@ public class KitchenDisplayMessage {
         private Long orderItemId;
         private String name;
         private Integer quantity;
-        private String notes;
-        private String status;
-    }
-}
+        privat

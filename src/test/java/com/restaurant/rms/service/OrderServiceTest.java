@@ -184,10 +184,4 @@ class OrderServiceTest {
         BigDecimal stockBefore = stockItem.getCurrentStock(); // 100.000
 
         OrderStatusUpdateRequest req = TestDataFactory.statusUpdate(OrderStatus.CANCELLED);
-        service.updateOrderStatus(100L, req);
-
-        // 2 × 0.200 = 0.400 restored
-        assertThat(stockItem.getCurrentStock())
-                .isEqualByComparingTo(stockBefore.add(new BigDecimal("0.400")));
-    }
-}
+        service.updateOrderStatus(100

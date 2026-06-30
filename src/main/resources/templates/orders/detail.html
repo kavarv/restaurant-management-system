@@ -22,7 +22,7 @@
       <!-- Context-aware action buttons -->
       <sec:authorize access="hasAnyRole('ADMIN','MANAGER')">
         <form th:if="${order.status == 'PENDING'}"
-              th:action="@{/api/v1/orders/{id}/status(id=${order.id})}" method="post">
+              th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <input type="hidden" name="status" value="CONFIRMED"/>
           <button type="submit" class="btn btn-success btn-sm">Confirm Order</button>
@@ -30,7 +30,7 @@
       </sec:authorize>
       <sec:authorize access="hasAnyRole('ADMIN','MANAGER','WAITER')">
         <form th:if="${order.status == 'READY'}"
-              th:action="@{/api/v1/orders/{id}/status(id=${order.id})}" method="post">
+              th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <input type="hidden" name="status" value="SERVED"/>
           <button type="submit" class="btn btn-primary btn-sm">Mark Served</button>
@@ -200,3 +200,4 @@
 </div>
 </body>
 </html>
+              

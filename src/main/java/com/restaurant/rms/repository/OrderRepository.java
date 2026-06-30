@@ -94,6 +94,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("end") LocalDateTime end);
 
     /** Count of orders in each status — for the real-time dashboard widget. */
-    @Query("SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status")
-    List<Object[]> countByStatusGrouped();
-}
+    @Query("SELECT o

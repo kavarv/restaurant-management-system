@@ -19,5 +19,4 @@ public interface ReportService {
     LowStockReport getLowStockReport();
 
     /** Export-friendly flat DTOs for CSV/PDF low-stock report. */
-    List<LowStockReportDTO> getLowStockReportDTOs();
-}
+    List<LowStockReportDTO> getLow

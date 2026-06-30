@@ -53,7 +53,4 @@ public interface UserService {
      *
      * @param id user ID
      * @throws com.restaurant.rms.exception.ResourceNotFoundException if not found
-     * @throws com.restaurant.rms.exception.InvalidOperationException if already inactive
-     */
-    void deactivateUser(Long id);
-}
+     * @throws com.restaurant.rms.exception.InvalidOperationException if alread

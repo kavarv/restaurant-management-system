@@ -23,6 +23,4 @@ public class TableResponse {
                 .status(t.getStatus())
                 .locationDescription(t.getLocationDescription())
                 .createdAt(t.getCreatedAt())
-                .build();
-    }
-}
+         

@@ -86,6 +86,4 @@ public class MenuItem extends SoftDeletableEntity {
     private List<MenuItemIngredient> ingredients = new ArrayList<>();
 
     /** LAZY: order history is never needed when displaying the menu. */
-    @OneToMany(mappedBy = "menuItem", fetch = FetchType.LAZY)
-    private List<OrderItem> orderItems = new ArrayList<>();
-}
+    @OneToMany(mappedBy = "menuItem"

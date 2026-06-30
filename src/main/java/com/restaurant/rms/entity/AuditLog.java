@@ -77,7 +77,4 @@ public class AuditLog {
     private LocalDateTime changedAt;
 
     @PrePersist
-    private void prePersist() {
-        changedAt = LocalDateTime.now();
-    }
-}
+  

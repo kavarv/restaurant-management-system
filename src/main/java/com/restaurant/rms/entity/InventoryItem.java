@@ -52,5 +52,4 @@ public class InventoryItem extends BaseEntity {
     /** LAZY: which dishes use this item is only needed in recipe management. */
     @OneToMany(mappedBy = "inventoryItem", fetch = FetchType.LAZY,
                cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MenuItemIngredient> menuItemIngredients = new ArrayList<>();
-}
+    private List<MenuItemI
