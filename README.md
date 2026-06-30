@@ -236,7 +236,6 @@ src/
 | Floor plan (table view) | `docs/screenshots/06-floor-plan.png` |
 | Inventory management | `docs/screenshots/07-inventory.png` |
 | Reports & analytics | `docs/screenshots/08-reports.png` |
-| Billing / payment | `docs/screenshots/09-billing.png` |
 
 ---
 
